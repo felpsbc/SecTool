@@ -1,4 +1,4 @@
-# AEGIS CODEtucional 
+# AEGIS CODE
 
 ## Identificação do repositório 
 

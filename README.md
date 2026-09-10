@@ -1,11 +1,4 @@
-# Nome do projeto 
-
-Repositório institucional de Projeto Integrador criado a partir do template do CEUB.
-
-> **Professor(a):** Leia as AS DIRETRIZES INSTITUCIONAIS constantes no repositório [DIRETRIZES](https://github.com/CAMPUSCEUB/DIRETRIZES), em especial o [Guia dos Professores](https://github.com/CAMPUSCEUB/DIRETRIZES/guias/github-enterprise-campus-ceub.md) e o [checklist do GitHub Enterprise](https://github.com/CAMPUSCEUB/DIRETRIZES/guias/github-enterprise-campus-ceub.md).
->
-> **Estudante:** Leia o [guia dos alunos](docs/guia-alunos.md).
-
+# AEGIS CODEtucional 
 
 ## Identificação do repositório 
 
@@ -13,17 +6,22 @@ Repositório institucional de Projeto Integrador criado a partir do template do 
 | --- | --- |
 | Instituição | CEUB |
 | Organização no GitHub | CampusCEUB |
-| Professor(a) responsável pela criação: | [Informar DRT e o(a) nome do professor(a)] |
-| Equipe | A equipe está listada nos times ou inserida diretamente no acesso a este repositório|
-| IDProjeto | Informar o ID do Projeto conforme consta no Portfólio de Projetos de TI do CEUB|
+| Professor(a) responsável pela criação: | Professor Lucas Rodrigues - 128050 |
+| Equipe | Felipe Barcelos de Carvalho, Lucas de Salles Almeida Moura, João Marcelo Guimarães Dourado, Marcos Vinícius Rocha |
+| IDProjeto | 20260229 |
 
 ## Problema
 
-Descreva sucintamente o problema, a oportunidade ou a necessidade que este projeto pretende tratar.
+Assistentes de programação baseados em LLMs aceleram o desenvolvimento, mas não garantem segurança: estudos indicam que entre 40% e 45% do código gerado por IA contém vulnerabilidades conhecidas (Pearce, 2022; Veracode, 2025). O risco se agrava porque esse código costuma ir para produção sem revisão, seja por pressão de prazos, falta de conhecimento especializado em segurança ou excesso de confiança no que a IA produz (Perry, 2023).
 
 ## Solução proposta
 
-Descreva sucintamente a solução planejada, o público atendido e o valor esperado.
+O **AEGIS-CODE** é uma ferramenta de análise estática de segurança (SAST) que atua como barreira automática entre o código gerado por IA e o ambiente de produção.
+
+- **Detecção focada em LLMs:** regras mapeadas ao CWE e OWASP Top 10 para as falhas mais comuns em código gerado por IA, além da verificação de pacotes inexistentes (*package hallucination*).
+- **Integração no fluxo:** CLI, hook de pre-commit e pipeline de CI/CD que bloqueia merges com achados críticos.
+- **Priorização por severidade:** classificação inspirada no CVSS v3.1 para reduzir o excesso de alertas.
+- **Remediação educativa:** cada achado vem com explicação acessível e exemplo de correção.
 
 ## Estrutura deste repositório
 

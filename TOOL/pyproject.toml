@@ -1,0 +1,21 @@
+[project]
+name = "owaspscan"
+version = "0.1.0"
+description = "Analisador estatico de vulnerabilidades OWASP Top 10 em codigo Python"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["owaspscan*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"

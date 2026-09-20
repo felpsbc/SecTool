@@ -1,0 +1,39 @@
+# Projeto: OWASP-Scan — Analisador de Vulnerabilidades em Código Python
+
+## Contexto
+Ferramenta de Iniciação Científica (Ciência da Computação, UniCEUB).
+Analisa código Python (Django/Flask) e detecta vulnerabilidades do
+OWASP Top 10, começando por SQLi, XSS e IDOR. Emite um resumo
+executivo dos achados.
+
+## Princípio arquitetural (NÃO VIOLAR)
+- Detecção baseada em AST (módulo `ast` da stdlib), NUNCA regex frágil.
+- O motor é taint tracking: rastreia dados de FONTES não confiáveis
+  até SINKS perigosos, verificando se há SANITIZAÇÃO no caminho.
+- Cada achado é normalizado para uma CWE e mapeado ao OWASP Top 10.
+- IDOR é heurístico: reporta CANDIDATOS para revisão manual, com
+  baixa confiança declarada. Não afirmar certeza sobre IDOR.
+- Honestidade científica acima de cobertura: preferir reportar
+  confiança calibrada a inflar detecções.
+
+## Stack
+- Python 3.11+, apenas stdlib no núcleo (ast, dataclasses, json, pathlib).
+- Testes com pytest. Sem frameworks web, sem dependências pesadas.
+
+## Formato do achado (contrato interno, fixo)
+Todo detector devolve objetos com estes campos:
+  arquivo, linha, cwe (ex. "CWE-89"), owasp (ex. "A03:2021 Injection"),
+  vulnerabilidade (ex. "SQL Injection"), severidade, confianca
+  (alta/media/baixa), trecho, descricao, recomendacao.
+
+## Mapeamento CWE -> OWASP (usar exatamente este, não inventar)
+  CWE-89  -> A03:2021 Injection            (SQL Injection)
+  CWE-79  -> A03:2021 Injection            (Cross-Site Scripting)
+  CWE-639 -> A01:2021 Broken Access Control (IDOR)
+
+## Regras de trabalho
+- Trabalhe em fases pequenas. Ao fim de cada fase, escreva o teste,
+  RODE com pytest e me mostre a saída antes de seguir.
+- Cada fase que passa nos testes termina com um git commit.
+- Explique decisões de design em 1-2 linhas antes de codar.
+- Se algo exigir suposição sobre escopo, PERGUNTE em vez de assumir.

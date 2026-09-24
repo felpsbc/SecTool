@@ -12,6 +12,7 @@ from pathlib import Path
 
 from owaspscan.achado import Achado
 from owaspscan.analisador import FalhaDeLeitura, analisar_diretorio
+from owaspscan.configuracao import ler_diretorio
 from owaspscan.detectores.base import Detector, ordenar_achados
 from owaspscan.detectores.autenticacao import (
     DetectorCookieInseguro,
@@ -22,7 +23,10 @@ from owaspscan.detectores.autenticacao import (
     DetectorSenhaEmTextoPuro,
 )
 from owaspscan.detectores.autorizacao import DetectorAutorizacao
-from owaspscan.detectores.credenciais import DetectorCredenciais
+from owaspscan.detectores.credenciais import (
+    DetectorCredenciais,
+    DetectorCredenciaisEmConfiguracao,
+)
 from owaspscan.detectores.csrf import DetectorCsrf
 from owaspscan.detectores.idor import DetectorIdor
 from owaspscan.detectores.open_redirect import DetectorOpenRedirect
@@ -65,6 +69,7 @@ class Varredura:
     raiz: str
     achados: tuple[Achado, ...] = ()
     arquivos_analisados: int = 0
+    arquivos_de_configuracao: int = 0
     falhas: tuple[FalhaDeLeitura, ...] = ()
     momento: datetime = field(default_factory=datetime.now)
     versao: str = VERSAO
@@ -89,8 +94,14 @@ def executar(
     detectores: tuple[Detector, ...] | None = None,
     catalogo: Catalogo = CATALOGO_PADRAO,
     momento: datetime | None = None,
+    incluir_configuracao: bool = True,
 ) -> Varredura:
-    """Analisa a raiz (arquivo ou diretorio) com todos os detectores."""
+    """Analisa a raiz (arquivo ou diretorio) com todos os detectores.
+
+    Alem do codigo Python, le arquivos de configuracao (.env, YAML, JSON,
+    INI, TOML, .properties) em busca de credenciais fixas, a menos que
+    `incluir_configuracao` seja False.
+    """
     caminho = Path(raiz)
     ativos = detectores if detectores is not None else detectores_padrao(catalogo)
     analisados, falhas = analisar_diretorio(caminho)
@@ -101,10 +112,19 @@ def executar(
         for detector in ativos:
             achados.extend(detector.detectar(arquivo, escopos))
 
+    configuracoes = []
+    if incluir_configuracao:
+        configuracoes, falhas_de_configuracao = ler_diretorio(caminho)
+        falhas = [*falhas, *falhas_de_configuracao]
+        detector_de_configuracao = DetectorCredenciaisEmConfiguracao()
+        for configuracao in configuracoes:
+            achados.extend(detector_de_configuracao.detectar(configuracao))
+
     return Varredura(
         raiz=str(raiz),
         achados=tuple(ordenar_achados(achados)),
         arquivos_analisados=len(analisados),
+        arquivos_de_configuracao=len(configuracoes),
         falhas=tuple(falhas),
         momento=momento or datetime.now(),
     )

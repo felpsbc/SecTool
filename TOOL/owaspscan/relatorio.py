@@ -112,6 +112,7 @@ def formatar_texto(varredura: Varredura) -> str:
         f" Raiz analisada : {varredura.raiz}",
         f" Data/hora      : {varredura.momento.strftime('%Y-%m-%d %H:%M:%S')}",
         f" Arquivos       : {varredura.arquivos_analisados} analisados, "
+        f"{varredura.arquivos_de_configuracao} de configuracao, "
         f"{len(varredura.falhas)} com falha de leitura",
         f" Achados        : {resumo.total} "
         f"({resumo.confirmados} rastreados por taint, "
@@ -177,6 +178,7 @@ def para_dict(varredura: Varredura) -> dict[str, object]:
         "momento": varredura.momento.isoformat(timespec="seconds"),
         "varredura": {
             "arquivos_analisados": varredura.arquivos_analisados,
+            "arquivos_de_configuracao": varredura.arquivos_de_configuracao,
             "arquivos_com_falha": len(varredura.falhas),
             "falhas": [
                 {

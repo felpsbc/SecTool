@@ -1,0 +1,13 @@
+# Amostra de docker-compose com credenciais fixas (gabarito inline).
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=loja
+      - POSTGRES_PASSWORD=postgres123  # achado: CWE-798
+  app:
+    image: loja/app:latest
+    environment:
+      REDIS_URL: "redis://:cache-s3nh4@redis:6379/0"  # achado: CWE-798
+      ADMIN_PASSWORD: admin123  # achado: CWE-798
+      LOG_LEVEL: info

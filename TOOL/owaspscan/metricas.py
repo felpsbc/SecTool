@@ -1,6 +1,7 @@
 """Avaliacao da ferramenta contra um corpus rotulado.
 
-O gabarito mora nas proprias amostras, como comentario na linha do sink:
+O gabarito mora nas proprias amostras (.py e arquivos de configuracao com
+comentario `#`), como comentario na linha do sink:
 
     cursor.execute("SELECT ... " + ident)   # achado: CWE-89, CWE-639
     cursor.execute(consulta)                # limitacao: CWE-89 fluxo interprocedural
@@ -21,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from owaspscan.achado import MAPA_CWE_OWASP
+from owaspscan.configuracao import descobrir_configuracoes
 from owaspscan.varredura import Varredura, executar
 
 _MARCA_ACHADO = re.compile(r"#\s*achado:\s*([A-Za-z0-9\-,\s]+)")
@@ -56,7 +58,10 @@ def carregar_gabarito(raiz: Path | str) -> list[ItemDeGabarito]:
     """Le os marcadores de gabarito de todos os .py sob a raiz."""
     raiz = Path(raiz)
     base = raiz if raiz.is_dir() else raiz.parent
-    arquivos = [raiz] if raiz.is_file() else sorted(raiz.rglob("*.py"))
+    if raiz.is_file():
+        arquivos = [raiz]
+    else:
+        arquivos = sorted({*raiz.rglob("*.py"), *descobrir_configuracoes(raiz)})
 
     itens: list[ItemDeGabarito] = []
     for caminho in arquivos:
@@ -146,7 +151,8 @@ def formatar_tabela(metricas: dict[str, Metricas], varredura: Varredura) -> str:
         "=" * 74,
         " OWASP-Scan — avaliacao contra corpus rotulado",
         "=" * 74,
-        f" Arquivos analisados : {varredura.arquivos_analisados}",
+        f" Arquivos analisados : {varredura.arquivos_analisados}"
+        f" (+ {varredura.arquivos_de_configuracao} de configuracao)",
         f" Arquivos com falha  : {len(varredura.falhas)}",
         "",
         f" {'CWE':<10}{'VP':>5}{'FP':>5}{'FN':>5}{'FN conh.':>10}"

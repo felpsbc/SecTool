@@ -1,0 +1,5 @@
+# TOML sem segredos: numeros e booleanos nao sao lidos como credencial.
+[tool.app]
+password_min_length = 12
+token_ttl = 3600
+require_password = true

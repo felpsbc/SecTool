@@ -1,0 +1,18 @@
+# Compose lendo segredos do ambiente e de Docker secrets. Nenhum achado.
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=loja
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+  app:
+    image: loja/app:latest
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      TOKEN_URL: https://auth.loja.com/token
+    secrets:
+      - db_password
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt

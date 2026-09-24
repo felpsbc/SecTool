@@ -1,0 +1,7 @@
+{
+  "auth": {
+    "password_policy": "forte",
+    "token_endpoint": "https://auth.loja.com/token",
+    "api_key": ""
+  }
+}

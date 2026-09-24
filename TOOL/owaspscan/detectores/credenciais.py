@@ -271,3 +271,58 @@ class DetectorCredenciais:
                     "Credencial comparada com literal fixo: funciona como "
                     "senha-mestra (backdoor) que nao pode ser trocada sem novo deploy.",
                 )
+
+
+# --- Arquivos de configuracao ----------------------------------------------
+
+
+@dataclass(frozen=True)
+class DetectorCredenciaisEmConfiguracao:
+    """CWE-798 em .env, YAML, JSON, INI, TOML e .properties.
+
+    Nao segue o protocolo de `Detector` (que recebe AST): recebe o arquivo
+    ja lido por `owaspscan.configuracao`. Mesmas regras de nome e valor do
+    detector de codigo. Em arquivo-modelo (`.env.example`) o achado cai
+    para severidade baixa: o valor deveria ser ficticio, mas vale conferir.
+    """
+
+    nome: str = "Hard-coded Credentials (configuracao)"
+    cwe: str = "CWE-798"
+
+    def detectar(self, configuracao) -> list[Achado]:
+        achados: list[Achado] = []
+        for entrada in configuracao.entradas:
+            if nomeia_credencial(entrada.chave) and e_segredo_plausivel(entrada.valor):
+                segredo = entrada.valor
+                descricao = (
+                    f"Credencial fixa em arquivo de configuracao: '{entrada.chave}'. "
+                    "Arquivo versionado e segredo publicado para todo o repositorio."
+                )
+            elif esquema := url_com_senha(entrada.valor):
+                segredo = urlsplit(entrada.valor.strip()).password
+                descricao = (
+                    f"URL {esquema}:// com senha embutida em '{entrada.chave}'."
+                )
+            else:
+                continue
+            exemplo = configuracao.e_exemplo
+            if exemplo:
+                descricao += (
+                    " O arquivo e um modelo (.example/.sample): confirme que o "
+                    "valor e ficticio e troque por um placeholder evidente."
+                )
+            achados.append(
+                criar_achado(
+                    arquivo=configuracao.arquivo,
+                    linha=entrada.linha,
+                    cwe=self.cwe,
+                    severidade="baixa" if exemplo else "alta",
+                    confianca="media" if exemplo else "alta",
+                    trecho=mascarar(" ".join(entrada.texto.split()), segredo)[:120],
+                    descricao=descricao,
+                    recomendacao=RECOMENDACAO
+                    + " Mantenha .env fora do git (.gitignore) e versione apenas "
+                    "um .env.example com placeholders.",
+                )
+            )
+        return achados

@@ -86,8 +86,12 @@ class Sanitizador:
     descricao: str
 
 
-_NEUTRALIZA_INJECAO = frozenset({"CWE-89", "CWE-79"})
+# Casts tambem neutralizam path traversal e open redirect: um inteiro nao
+# carrega "../" nem "//site-do-atacante".
+_NEUTRALIZA_INJECAO = frozenset({"CWE-89", "CWE-79", "CWE-22", "CWE-601"})
 _NEUTRALIZA_XSS = frozenset({"CWE-79"})
+_NEUTRALIZA_TRAVERSAL = frozenset({"CWE-22"})
+_NEUTRALIZA_REDIRECT = frozenset({"CWE-601"})
 
 # Casts que trocam o tipo do valor: o resultado deixa de ser string
 # arbitraria controlada pelo atacante. Nao defendem IDOR — um inteiro
@@ -107,6 +111,25 @@ SANITIZADORES: tuple[Sanitizador, ...] = (
     Sanitizador("flask.escape", _NEUTRALIZA_XSS, "escape de HTML"),
     Sanitizador("django.utils.html.escape", _NEUTRALIZA_XSS, "escape de HTML"),
     Sanitizador("bleach.clean", _NEUTRALIZA_XSS, "sanitizacao de HTML (bleach)"),
+    # Nome de arquivo: removem separadores e "..". Nao defendem injecao.
+    Sanitizador("secure_filename", _NEUTRALIZA_TRAVERSAL, "werkzeug secure_filename"),
+    Sanitizador(
+        "werkzeug.utils.secure_filename", _NEUTRALIZA_TRAVERSAL, "werkzeug secure_filename"
+    ),
+    Sanitizador("safe_join", _NEUTRALIZA_TRAVERSAL, "safe_join (recusa sair da base)"),
+    Sanitizador("flask.safe_join", _NEUTRALIZA_TRAVERSAL, "safe_join (recusa sair da base)"),
+    Sanitizador(
+        "werkzeug.security.safe_join", _NEUTRALIZA_TRAVERSAL, "safe_join (recusa sair da base)"
+    ),
+    Sanitizador(
+        "werkzeug.utils.safe_join", _NEUTRALIZA_TRAVERSAL, "safe_join (recusa sair da base)"
+    ),
+    Sanitizador("os.path.basename", _NEUTRALIZA_TRAVERSAL, "basename (descarta diretorios)"),
+    Sanitizador("basename", _NEUTRALIZA_TRAVERSAL, "basename (descarta diretorios)"),
+    # url_for gera URL interna: o dado vira parametro, nunca o destino.
+    Sanitizador("url_for", _NEUTRALIZA_REDIRECT, "url_for (URL interna)"),
+    Sanitizador("flask.url_for", _NEUTRALIZA_REDIRECT, "url_for (URL interna)"),
+    Sanitizador("reverse", _NEUTRALIZA_REDIRECT, "reverse do Django (URL interna)"),
 )
 
 # Manipulacao de string: nao sanitiza, mas tambem nao e caixa-preta. Passar
@@ -145,6 +168,17 @@ OPERACOES_DE_STRING: frozenset[str] = frozenset(
         "tuple",
         "next",
         "iter",
+        # Caminhos: transformam sem sanitizar. Normalizar "../" nao impede
+        # sair da base; so a comparacao com a base impede (ver guardas).
+        "Path",
+        "PurePath",
+        "PurePosixPath",
+        "joinpath",
+        "abspath",
+        "normpath",
+        "realpath",
+        "resolve",
+        "expanduser",
     }
 )
 
@@ -217,6 +251,109 @@ RESPOSTAS_COM_AUTO_ESCAPE: frozenset[str] = frozenset(
 # Decoradores que marcam uma funcao como view de rota (Flask e Django REST).
 DECORADORES_DE_ROTA: frozenset[str] = frozenset(
     {"route", "get", "post", "put", "patch", "delete", "websocket"}
+)
+
+
+# --- Path traversal (CWE-22) e open redirect (CWE-601) --------------------
+
+
+@dataclass(frozen=True)
+class SinkDeArgumento:
+    """Chamada perigosa quando certos argumentos vem de fonte nao confiavel.
+
+    `qualificado=True` compara o nome resolvido pelas importacoes
+    (`os.remove`), para que `lista.remove(x)` nao seja confundido com
+    apagar arquivo. `qualificado=False` compara so o ultimo segmento, para
+    nomes inequivocos como `send_file`.
+    """
+
+    rotulo: str
+    posicoes: tuple[int, ...]
+    palavras_chave: tuple[str, ...]
+    descricao: str
+    qualificado: bool = True
+
+
+SINKS_DE_CAMINHO: tuple[SinkDeArgumento, ...] = (
+    SinkDeArgumento("open", (0,), ("file",), "open()"),
+    SinkDeArgumento("io.open", (0,), ("file",), "io.open()"),
+    SinkDeArgumento("codecs.open", (0,), ("filename",), "codecs.open()"),
+    SinkDeArgumento("os.open", (0,), ("path",), "os.open()"),
+    SinkDeArgumento("os.remove", (0,), ("path",), "os.remove()"),
+    SinkDeArgumento("os.unlink", (0,), ("path",), "os.unlink()"),
+    SinkDeArgumento("os.rmdir", (0,), ("path",), "os.rmdir()"),
+    SinkDeArgumento("os.listdir", (0,), ("path",), "os.listdir()"),
+    SinkDeArgumento("os.scandir", (0,), ("path",), "os.scandir()"),
+    SinkDeArgumento("os.makedirs", (0,), ("name",), "os.makedirs()"),
+    SinkDeArgumento("os.rename", (0, 1), ("src", "dst"), "os.rename()"),
+    SinkDeArgumento("os.replace", (0, 1), ("src", "dst"), "os.replace()"),
+    SinkDeArgumento("shutil.rmtree", (0,), ("path",), "shutil.rmtree()"),
+    SinkDeArgumento("shutil.copy", (0, 1), ("src", "dst"), "shutil.copy()"),
+    SinkDeArgumento("shutil.copyfile", (0, 1), ("src", "dst"), "shutil.copyfile()"),
+    SinkDeArgumento("shutil.copy2", (0, 1), ("src", "dst"), "shutil.copy2()"),
+    SinkDeArgumento("shutil.move", (0, 1), ("src", "dst"), "shutil.move()"),
+    SinkDeArgumento(
+        "send_file", (0,), ("path_or_file", "filename_or_fp"), "send_file()", False
+    ),
+    # send_from_directory ja usa safe_join no nome do arquivo; o diretorio
+    # base, porem, nao pode vir do usuario.
+    SinkDeArgumento("send_from_directory", (0,), ("directory",), "send_from_directory()", False),
+    SinkDeArgumento("FileResponse", (0,), (), "FileResponse()", False),
+)
+
+# Metodos de pathlib que tocam o disco: sink quando o RECEPTOR e contaminado
+# (`Path(nome).read_text()`).
+METODOS_DE_ARQUIVO_NO_RECEPTOR: frozenset[str] = frozenset(
+    {
+        "read_text",
+        "read_bytes",
+        "write_text",
+        "write_bytes",
+        "unlink",
+        "rmdir",
+        "touch",
+        "iterdir",
+    }
+)
+
+# Metodos cujo 1o argumento e caminho de destino: `arquivo.save(destino)`
+# (werkzeug FileStorage, PIL.Image).
+METODOS_DE_ARQUIVO_NO_ARGUMENTO: frozenset[str] = frozenset({"save"})
+
+# Comparacoes que confinam o caminho a uma base, quando feitas sobre um
+# caminho canonicalizado (realpath/abspath/normpath/resolve).
+GUARDAS_DE_CAMINHO: frozenset[str] = frozenset(
+    {"startswith", "is_relative_to", "commonpath", "commonprefix"}
+)
+CANONICALIZADORES_DE_CAMINHO: frozenset[str] = frozenset(
+    {"realpath", "abspath", "normpath", "resolve"}
+)
+
+SINKS_DE_REDIRECT: tuple[SinkDeArgumento, ...] = (
+    SinkDeArgumento("redirect", (0,), ("location", "to"), "redirect()", False),
+    SinkDeArgumento(
+        "HttpResponseRedirect", (0,), ("redirect_to",), "HttpResponseRedirect()", False
+    ),
+    SinkDeArgumento(
+        "HttpResponsePermanentRedirect",
+        (0,),
+        ("redirect_to",),
+        "HttpResponsePermanentRedirect()",
+        False,
+    ),
+    SinkDeArgumento("RedirectResponse", (0,), ("url",), "RedirectResponse()", False),
+)
+
+# Validacoes de destino de redirect. Usadas como teste de um `if`, suprimem
+# o achado sobre o valor validado.
+VALIDADORES_DE_REDIRECT: frozenset[str] = frozenset(
+    {
+        "url_has_allowed_host_and_scheme",
+        "is_safe_url",
+        "is_safe_redirect_url",
+        "is_safe_redirect",
+        "url_is_safe",
+    }
 )
 
 

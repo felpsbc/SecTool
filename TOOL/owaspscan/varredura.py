@@ -14,6 +14,8 @@ from owaspscan.achado import Achado
 from owaspscan.analisador import FalhaDeLeitura, analisar_diretorio
 from owaspscan.detectores.base import Detector, ordenar_achados
 from owaspscan.detectores.idor import DetectorIdor
+from owaspscan.detectores.open_redirect import DetectorOpenRedirect
+from owaspscan.detectores.path_traversal import DetectorPathTraversal
 from owaspscan.detectores.sqli import DetectorSqlInjection
 from owaspscan.detectores.xss import DetectorXss
 from owaspscan.detectores.xxe import DetectorXxe
@@ -31,6 +33,8 @@ def detectores_padrao(catalogo: Catalogo = CATALOGO_PADRAO) -> tuple[Detector, .
         DetectorXss(catalogo=catalogo),
         DetectorIdor(catalogo=catalogo),
         DetectorXxe(catalogo=catalogo),
+        DetectorPathTraversal(catalogo=catalogo),
+        DetectorOpenRedirect(catalogo=catalogo),
     )
 
 

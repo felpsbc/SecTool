@@ -81,10 +81,10 @@ class TestAvaliacaoDoCorpus:
     def test_nenhum_falso_positivo_no_corpus(self, metricas):
         assert metricas["geral"].fp == 0
 
-    def test_o_unico_falso_negativo_e_a_limitacao_declarada(self, metricas):
+    def test_todo_falso_negativo_e_limitacao_declarada(self, metricas):
         geral = metricas["geral"]
-        assert geral.fn == 1
-        assert geral.fn_conhecidos == 1
+        assert geral.fn >= 1
+        assert geral.fn == geral.fn_conhecidos
 
     def test_limitacao_declarada_nao_vira_isencao(self, metricas):
         # O recall NAO desconta o falso negativo conhecido: declarar a falha

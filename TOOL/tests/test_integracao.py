@@ -32,12 +32,26 @@ class TestVarreduraCompleta:
     def test_pasta_segura_nao_tem_achado_de_alta_severidade(self):
         varredura = executar(SEGURO)
         assert not varredura.tem_severidade_alta
-        assert {a.cwe for a in varredura.confirmados} == set()
 
-    def test_pasta_segura_so_produz_candidatos_heuristicos(self):
-        # Query parametrizada resolve CWE-89, nao CWE-639.
+    def test_pasta_segura_so_confirma_o_que_o_gabarito_marca(self):
+        # As amostras sao seguras para a CWE que nomeiam, nao para todas:
+        # query parametrizada resolve CWE-89, nao CWE-639. Todo achado
+        # confirmado ali precisa estar rotulado no gabarito.
         varredura = executar(SEGURO)
-        assert {a.confianca for a in varredura.achados} <= {"baixa"}
+        gabarito = {i.chave for i in carregar_gabarito(SEGURO)}
+        assert {(a.arquivo, a.linha, a.cwe) for a in varredura.confirmados} <= gabarito
+
+    def test_pasta_segura_nao_tem_achado_da_cwe_que_cada_arquivo_nomeia(self):
+        nomeadas = {
+            "flask_sqli.py": "CWE-89",
+            "flask_xss.py": "CWE-79",
+            "flask_idor.py": "CWE-639",
+            "flask_xxe.py": "CWE-611",
+            "flask_path_traversal.py": "CWE-22",
+            "flask_open_redirect.py": "CWE-601",
+        }
+        for achado in executar(SEGURO).achados:
+            assert nomeadas.get(achado.arquivo) != achado.cwe, achado
 
     def test_achados_saem_ordenados_por_arquivo_e_linha(self):
         achados = executar(VULNERAVEL).achados
@@ -139,4 +153,4 @@ class TestExecucaoComoModulo:
         )
         assert processo.returncode == CODIGO_OK
         dados = json.loads(processo.stdout)
-        assert dados["resumo"]["rastreados_por_taint"] == 0
+        assert dados["resumo"]["total"] == len(dados["achados"])

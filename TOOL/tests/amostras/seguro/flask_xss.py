@@ -31,9 +31,9 @@ def estatico():
 
 @app.route("/ir")
 def ir():
-    # Nao e XSS: redirect nao devolve HTML. (Isto e um open redirect,
-    # CWE-601, fora do escopo atual da ferramenta — registrado de proposito.)
-    return redirect(request.args["destino"])
+    # Nao e XSS: redirect nao devolve HTML. E, porem, open redirect
+    # (CWE-601): a amostra e segura para a CWE que nomeia, nao para todas.
+    return redirect(request.args["destino"])  # achado: CWE-601
 
 
 @app.route("/contador")

@@ -16,6 +16,7 @@ from owaspscan.detectores.base import Detector, ordenar_achados
 from owaspscan.detectores.idor import DetectorIdor
 from owaspscan.detectores.sqli import DetectorSqlInjection
 from owaspscan.detectores.xss import DetectorXss
+from owaspscan.detectores.xxe import DetectorXxe
 from owaspscan.motor.catalogo import CATALOGO_PADRAO, Catalogo
 from owaspscan.motor.taint import analisar_taint
 
@@ -24,11 +25,12 @@ CONFIANCA_DE_CANDIDATO = "baixa"
 
 
 def detectores_padrao(catalogo: Catalogo = CATALOGO_PADRAO) -> tuple[Detector, ...]:
-    """Os tres detectores do escopo atual, na ordem do relatorio."""
+    """Os detectores do escopo atual, na ordem do relatorio."""
     return (
         DetectorSqlInjection(catalogo=catalogo),
         DetectorXss(catalogo=catalogo),
         DetectorIdor(catalogo=catalogo),
+        DetectorXxe(catalogo=catalogo),
     )
 
 

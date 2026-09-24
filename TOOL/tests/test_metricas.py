@@ -74,8 +74,9 @@ def metricas():
 
 
 class TestAvaliacaoDoCorpus:
-    def test_cobre_as_tres_cwes_e_o_total(self, metricas):
-        assert set(metricas) == {"CWE-89", "CWE-79", "CWE-639", "geral"}
+    def test_cobre_as_cwes_do_gabarito_e_o_total(self, metricas):
+        cwes = {item.cwe for item in carregar_gabarito(DIRETORIO_AMOSTRAS)}
+        assert set(metricas) == cwes | {"geral"}
 
     def test_nenhum_falso_positivo_no_corpus(self, metricas):
         assert metricas["geral"].fp == 0

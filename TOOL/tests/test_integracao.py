@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from conftest import DIRETORIO_AMOSTRAS
+from owaspscan.metricas import carregar_gabarito
 from owaspscan.cli import CODIGO_ACHADO_ALTO, CODIGO_ERRO_DE_USO, CODIGO_OK, main
 from owaspscan.varredura import executar
 
@@ -18,9 +19,10 @@ RAIZ_PROJETO = Path(__file__).resolve().parent.parent
 
 
 class TestVarreduraCompleta:
-    def test_encontra_as_tres_cwes_na_pasta_vulneravel(self):
+    def test_encontra_todas_as_cwes_do_gabarito_na_pasta_vulneravel(self):
         varredura = executar(VULNERAVEL, momento=datetime(2026, 9, 16))
-        assert {a.cwe for a in varredura.achados} == {"CWE-89", "CWE-79", "CWE-639"}
+        esperadas = {i.cwe for i in carregar_gabarito(VULNERAVEL) if not i.limitacao}
+        assert {a.cwe for a in varredura.achados} == esperadas
 
     def test_conta_arquivos_analisados(self):
         varredura = executar(VULNERAVEL)
@@ -103,7 +105,9 @@ class TestSaidaDaCli:
     def test_json_traz_achados_e_metadados(self, capsys):
         main([str(VULNERAVEL), "--json"])
         dados = json.loads(capsys.readouterr().out)
-        assert dados["varredura"]["arquivos_analisados"] == 3
+        assert dados["varredura"]["arquivos_analisados"] == len(
+            list(VULNERAVEL.glob("*.py"))
+        )
         assert dados["resumo"]["total"] == len(dados["achados"])
         assert dados["resumo"]["candidatos_heuristicos"] > 0
 

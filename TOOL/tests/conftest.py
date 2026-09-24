@@ -28,3 +28,21 @@ def linhas_de_limitacao(caminho: Path) -> list[int]:
     return sorted(
         item.linha for item in carregar_gabarito(caminho) if item.limitacao
     )
+
+
+def rodar_detector(detector, fonte: str, arquivo: str = "app.py"):
+    """Roda um detector sobre codigo em memoria."""
+    from owaspscan.analisador import analisar_texto
+    from owaspscan.motor.taint import analisar_taint
+
+    analisado = analisar_texto(fonte, arquivo)
+    return detector.detectar(analisado, analisar_taint(analisado))
+
+
+def rodar_detector_em_arquivo(detector, caminho: Path):
+    """Roda um detector sobre uma amostra do corpus."""
+    from owaspscan.analisador import analisar_arquivo
+    from owaspscan.motor.taint import analisar_taint
+
+    analisado = analisar_arquivo(caminho, caminho.parent)
+    return detector.detectar(analisado, analisar_taint(analisado))

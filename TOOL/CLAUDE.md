@@ -30,6 +30,22 @@ Todo detector devolve objetos com estes campos:
   CWE-89  -> A03:2021 Injection            (SQL Injection)
   CWE-79  -> A03:2021 Injection            (Cross-Site Scripting)
   CWE-639 -> A01:2021 Broken Access Control (IDOR)
+  CWE-22   -> A01:2021 Broken Access Control (Path Traversal)
+  CWE-601  -> A01:2021 Broken Access Control (Open Redirect)
+  CWE-352  -> A01:2021 Broken Access Control (Cross-Site Request Forgery)
+  CWE-862  -> A01:2021 Broken Access Control (Missing Authorization)
+  CWE-916  -> A02:2021 Cryptographic Failures (Weak Password Hash)
+  CWE-256  -> A04:2021 Insecure Design (Unprotected Storage of Credentials)
+  CWE-611  -> A05:2021 Security Misconfiguration (XML External Entity (XXE))
+  CWE-614  -> A05:2021 Security Misconfiguration (Cookie Without Secure Flag)
+  CWE-1004 -> A05:2021 Security Misconfiguration (Cookie Without HttpOnly Flag)
+  CWE-287  -> A07:2021 Identification and Authentication Failures (Improper Authentication)
+  CWE-307  -> A07:2021 Identification and Authentication Failures (Excessive Authentication Attempts)
+  CWE-613  -> A07:2021 Identification and Authentication Failures (Insufficient Session Expiration)
+  CWE-798  -> A07:2021 Identification and Authentication Failures (Hard-coded Credentials)
+  Fonte: "List of Mapped CWEs" oficial do OWASP Top 10:2021. Hash fraco de
+  senha (A02), senha em texto puro (A04), cookies e XXE (A05) seguem a
+  categoria oficial da CWE, nao o tema do detector que os encontra.
 
 ## Regras de trabalho
 - Trabalhe em fases pequenas. Ao fim de cada fase, escreva o teste,

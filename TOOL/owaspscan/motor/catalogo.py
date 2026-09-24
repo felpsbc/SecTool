@@ -430,6 +430,76 @@ DECORADORES_DE_AUTORIZACAO: frozenset[str] = frozenset(
 )
 
 
+# Decoradores que indicam AUTENTICACAO. Nao suprimem IDOR, mas mostram que
+# a rota nao esta aberta a anonimos.
+DECORADORES_DE_AUTENTICACAO: frozenset[str] = frozenset(
+    {
+        "login_required",
+        "fresh_login_required",
+        "jwt_required",
+        "token_required",
+        "auth_required",
+        "requires_auth",
+        "authenticated",
+        "auth_token_required",
+        "http_auth_required",
+        "roles_accepted",
+        "login_user_required",
+    }
+)
+
+# Checagens no corpo da view que indicam controle de acesso explicito.
+ATRIBUTOS_DE_CHECAGEM_DE_ACESSO: frozenset[str] = frozenset(
+    {
+        "is_authenticated",
+        "is_anonymous",
+        "is_admin",
+        "is_staff",
+        "is_superuser",
+        "has_perm",
+        "has_perms",
+        "has_role",
+        "has_permission",
+        "check_permission",
+        "check_object_permissions",
+        "can",
+    }
+)
+
+# Rotas publicas por natureza: exigir autenticacao nelas nao faz sentido.
+PALAVRAS_DE_ROTA_PUBLICA: frozenset[str] = frozenset(
+    {
+        "login",
+        "logout",
+        "signin",
+        "signup",
+        "register",
+        "registrar",
+        "cadastro",
+        "cadastrar",
+        "entrar",
+        "sair",
+        "reset",
+        "forgot",
+        "esqueci",
+        "recuperar",
+        "token",
+        "callback",
+        "webhook",
+        "health",
+        "healthz",
+    }
+)
+
+# Decoradores que desligam CSRF numa view.
+DECORADORES_CSRF_EXEMPT: frozenset[str] = frozenset({"csrf_exempt", "exempt"})
+
+# Chaves de configuracao que desligam CSRF quando recebem False.
+CONFIGURACOES_CSRF: frozenset[str] = frozenset(
+    {"WTF_CSRF_ENABLED", "WTF_CSRF_CHECK_DEFAULT", "CSRF_ENABLED"}
+)
+
+
 def tem_decorador_de_autorizacao(no: ast.AST) -> bool:
     """A view declara checagem de permissao por decorador?"""
     for decorador in getattr(no, "decorator_list", []):

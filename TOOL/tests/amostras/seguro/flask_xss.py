@@ -3,7 +3,7 @@
 from flask import Flask, jsonify, redirect, render_template, request
 from markupsafe import escape
 
-app = Flask(__name__)
+app = Flask(__name__)  # achado: CWE-352
 
 
 @app.route("/ola")
@@ -13,7 +13,7 @@ def ola():
 
 
 @app.route("/perfil", methods=["POST"])
-def perfil():
+def perfil():  # achado: CWE-862
     bio = escape(request.form["bio"])
     return "<div class='bio'>" + bio + "</div>"
 

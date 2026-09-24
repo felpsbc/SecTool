@@ -49,6 +49,11 @@ class TestVarreduraCompleta:
             "flask_xxe.py": "CWE-611",
             "flask_path_traversal.py": "CWE-22",
             "flask_open_redirect.py": "CWE-601",
+            "flask_csrf.py": "CWE-352",
+            "django_csrf.py": "CWE-352",
+            "flask_api_token.py": "CWE-352",
+            "flask_autorizacao.py": "CWE-862",
+            "flask_blueprint_hook.py": "CWE-862",
         }
         for achado in executar(SEGURO).achados:
             assert nomeadas.get(achado.arquivo) != achado.cwe, achado
@@ -59,9 +64,12 @@ class TestVarreduraCompleta:
         assert chaves == sorted(chaves)
 
     def test_arquivo_unico_como_raiz(self):
-        varredura = executar(VULNERAVEL / "flask_sqli.py")
+        amostra = VULNERAVEL / "flask_sqli.py"
+        varredura = executar(amostra)
         assert varredura.arquivos_analisados == 1
-        assert {a.cwe for a in varredura.achados} == {"CWE-89", "CWE-639"}
+        esperadas = {i.cwe for i in carregar_gabarito(amostra) if not i.limitacao}
+        assert {"CWE-89", "CWE-639"} <= esperadas
+        assert {a.cwe for a in varredura.achados} == esperadas
 
     def test_arquivo_quebrado_nao_derruba_a_varredura(self, tmp_path):
         (tmp_path / "ok.py").write_text(

@@ -10,7 +10,7 @@ import uuid
 
 from flask import Flask, request
 
-app = Flask(__name__)
+app = Flask(__name__)  # achado: CWE-352
 
 
 def conexao():
@@ -49,7 +49,7 @@ def listar_ativos():
 
 
 @app.route("/lote", methods=["POST"])
-def inserir_lote():
+def inserir_lote():  # achado: CWE-862
     cursor = conexao().cursor()
     cursor.executemany(
         "INSERT INTO itens (nome) VALUES (?)",

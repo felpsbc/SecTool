@@ -7,7 +7,7 @@ propria linha; ver tests/conftest.py.
 from flask import Flask, make_response, render_template_string, request
 from markupsafe import Markup
 
-app = Flask(__name__)
+app = Flask(__name__)  # achado: CWE-352
 
 
 @app.route("/ola")
@@ -17,7 +17,7 @@ def ola():
 
 
 @app.route("/perfil", methods=["POST"])
-def perfil():
+def perfil():  # achado: CWE-862
     bio = request.form["bio"]
     return render_template_string("<div class='bio'>" + bio + "</div>")  # achado: CWE-79
 

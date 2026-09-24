@@ -4,6 +4,31 @@ Analisador estatico de vulnerabilidades OWASP Top 10 em codigo Python
 (Django/Flask), baseado em AST e taint tracking. Projeto de Iniciacao
 Cientifica — Ciencia da Computacao, UniCEUB.
 
+## Cobertura
+
+Cada achado e classificado pela CWE, e a categoria OWASP vem da lista
+oficial "List of Mapped CWEs" do Top 10:2021 — nao do tema do detector.
+Por isso "hash fraco de senha", tema de autenticacao, aparece em A02.
+
+| CWE | Vulnerabilidade | OWASP 2021 | Tecnica | Confianca |
+| --- | --- | --- | --- | --- |
+| CWE-89 | SQL Injection | A03 | taint | alta/media |
+| CWE-79 | Cross-Site Scripting | A03 | taint | alta/media |
+| CWE-639 | IDOR | A01 | heuristica | baixa (candidato) |
+| CWE-22 | Path Traversal | A01 | taint + guardas | alta/media |
+| CWE-601 | Open Redirect | A01 | taint + guardas | alta/media |
+| CWE-352 | CSRF desligado | A01 | estrutural / heuristica | alta ou baixa |
+| CWE-862 | Rota sem autorizacao | A01 | heuristica | baixa (candidato) |
+| CWE-916 | Hash rapido de senha | A02 | estrutural (nome) | media |
+| CWE-256 | Senha em texto puro | A04 | taint | alta/media |
+| CWE-611 | XXE | A05 | estrutural + taint | alta/media |
+| CWE-614 | Cookie sem Secure | A05 | estrutural | alta/media |
+| CWE-1004 | Cookie sem HttpOnly | A05 | estrutural | alta/media |
+| CWE-287 | JWT sem verificacao | A07 | estrutural | alta |
+| CWE-307 | Login sem rate limit | A07 | heuristica | baixa (candidato) |
+| CWE-613 | Sessao longa demais | A07 | estrutural | alta |
+| CWE-798 | Credencial fixa (.py e configuracao) | A07 | estrutural | alta/media |
+
 ## Ambiente
 
     python3 -m venv .venv
@@ -13,6 +38,7 @@ Cientifica — Ciencia da Computacao, UniCEUB.
 
     python -m owaspscan caminho/do/projeto
     python -m owaspscan app.py --json | jq '.resumo'
+    python -m owaspscan .env          # arquivo de configuracao isolado
 
 Codigos de saida: `0` sem achado de severidade alta, `1` com achado alto,
 `2` erro de uso. Candidatos heuristicos (confianca baixa) nao alteram o
@@ -41,6 +67,11 @@ Preferimos confianca calibrada a cobertura inflada. O motor de taint e:
    uma ferramenta de seguranca, ao custo de falso positivo quando `f`
    sanitiza.
 
+5. **Guardas sao insensiveis a fluxo.** Em path traversal e open redirect,
+   uma validacao (`realpath` + `startswith`, `url_has_allowed_host_and_scheme`)
+   presente numa condicao do escopo suprime o achado sobre o valor validado;
+   o motor nao confirma que o ramo de falha de fato aborta.
+
 ## Calibracao de confianca
 
 O campo `confianca` carrega informacao sobre a cadeia fonte -> sink, nao a
@@ -52,10 +83,21 @@ gravidade da CWE:
   entao o motor nao viu o caminho inteiro.
 - **baixa**: reservada a deteccao heuristica (IDOR), que reporta candidatos.
 
+Nos detectores **estruturais** (configuracao, decorators, chamadas de
+biblioteca), nao ha cadeia fonte -> sink; ali `confianca` mede a certeza de
+que o padrao inseguro esta presente: `alta` quando o codigo o declara
+literalmente (`resolve_entities=True`, `@csrf_exempt`, `verify=False`),
+`media` quando depende de algo que a analise nao ve (versao do lxml,
+variavel de ambiente que pode existir em producao, nome de identificador).
+
 Sanitizacao nao rebaixa confianca: quando neutraliza a CWE em questao, remove
 o achado. Cada sanitizador declara **quais CWEs neutraliza** — `int()` defende
 SQL Injection e XSS; `html.escape()` defende XSS e **nao** defende SQL
-Injection. Tratar sanitizacao como absoluta seria falso negativo.
+Injection. Tratar sanitizacao como absoluta seria falso negativo. O mesmo
+vale para os novos detectores: `secure_filename` defende CWE-22 e nada mais;
+`url_for` defende CWE-601; `generate_password_hash`/`bcrypt` defendem CWE-256
+— e `md5` tambem tira a senha do texto puro (CWE-256), mas continua sendo
+reportado como hash fraco (CWE-916).
 
 ## IDOR e heuristico
 
@@ -74,6 +116,57 @@ Uma consequencia util: parametrizar a query resolve CWE-89 e nao resolve
 CWE-639. As amostras em `tests/amostras/seguro/` sao seguras para a CWE que
 nomeiam, nao para todas.
 
+## Candidatos heuristicos alem do IDOR
+
+Seguem a mesma regra do IDOR — `confianca` baixa, descricao que comeca por
+"Candidato a ..." e nega afirmar vulnerabilidade, sem efeito no codigo de
+saida:
+
+- **CWE-862 rota sem autorizacao**: rota POST/PUT/PATCH/DELETE sem nenhum
+  decorator de autenticacao/autorizacao nem checagem no corpo, ou rota de
+  `/admin` sem checagem de papel. `@login_required` basta para rota comum e
+  **nao** basta para `/admin`. Rotas publicas por natureza (login, cadastro,
+  webhook) sao ignoradas; um `before_request` no arquivo suprime todas.
+- **CWE-352 app sem CSRFProtect**: app Flask com rota que altera estado e
+  nenhum `CSRFProtect`/`FlaskForm` no arquivo (a protecao pode estar em
+  outro modulo). Rotas com `@jwt_required` nao contam: token no cabecalho
+  nao e enviado pelo navegador sozinho.
+- **CWE-307 login sem limite**: rota POST de login sem `@limiter.limit`,
+  sem `Limiter(default_limits=...)` e sem contagem de tentativas visivel.
+
+## XXE: o que nao e reportado
+
+`xml.etree`, `minidom` e `xml.sax` da stdlib nao resolvem entidades
+externas desde o Python 3.7.1 e nao sao acusados. O risco restante deles,
+expansao recursiva ("billion laughs", CWE-776), esta fora do escopo. O
+lxml e acusado com confianca alta quando o parser e configurado para
+resolver entidades, e media quando recebe dado da requisicao com o parser
+padrao (o comportamento padrao mudou na versao 5.0, invisivel a analise).
+
+## Credenciais fixas (CWE-798)
+
+A decisao tem duas metades: o **nome** diz que e credencial (`password`,
+`senha`, `secret`, `token`, `api_key`...), exceto quando e metadado
+(`password_min_length`, `token_url`, `token_type`); e o **valor** e um
+literal plausivel, nao placeholder (`${VAR}`, `<sua-chave>`, `****`) nem
+referencia (caminho, nome de variavel de ambiente). Senhas fracas como
+`changeme` ou `password` **sao** reportadas: sao credenciais reais quando
+chegam a producao.
+
+No codigo Python, alem de atribuicoes, sao vistos: argumentos nomeados,
+chaves de dicionario, defaults de parametro, fallback de `os.getenv`
+(confianca media), `auth=(u, p)`, `smtp.login(u, p)`, `create_superuser`
+com senha posicional, comparacao com literal (senha-mestra) e URL com
+senha embutida. O trecho do relatorio **mascara o segredo**: a ferramenta
+nao pode ser o vazamento que denuncia.
+
+**Excecao declarada ao principio "somente AST"**: arquivos de configuracao
+nao sao Python. `.env`, `.properties`, INI e TOML sao lidos pela gramatica
+de linha do formato; JSON pelo parser da stdlib; YAML (sem parser na stdlib)
+por pares `chave: valor` e itens `- CHAVE=valor`, sem interpretar escalares
+de bloco, multi-linha nem ancoras. Arquivos-modelo (`.env.example`) saem com
+severidade baixa.
+
 ## Avaliacao
 
     .venv/bin/python -m owaspscan.metricas tests/amostras
@@ -88,9 +181,16 @@ marca vulnerabilidade real que sabemos nao encontrar. **Limitacao declarada
 conta como falso negativo**: declarar a falha nao a transforma em acerto, e
 por isso o recall de CWE-89 e menor que 1.
 
-Resultado atual sobre o corpus (7 arquivos analisados, 1 com erro de sintaxe
-proposital): precisao 1.00, recall 0.95, F1 0.97 no geral; o unico falso
-negativo e a limitacao interprocedural declarada.
+Resultado atual sobre o corpus (25 arquivos Python e 9 de configuracao
+analisados, 1 com erro de sintaxe proposital, 16 CWEs): precisao 1.00,
+recall 0.98, F1 0.99 no geral; os dois falsos negativos sao as limitacoes
+interprocedurais declaradas (CWE-89 e CWE-22).
+
+As amostras de `tests/amostras/seguro/` sao seguras para a CWE que nomeiam,
+nao para todas: quando um detector novo encontra outra CWE real numa amostra
+antiga (o open redirect ja comentado em `seguro/flask_xss.py`, por exemplo),
+a linha e rotulada no gabarito em vez de a amostra ser "limpa" para inflar
+a precisao.
 
 **Limite de validade**: corpus proprio, pequeno e construido junto com a
 ferramenta. Estes numeros medem consistencia interna, NAO generalizacao.
@@ -108,3 +208,12 @@ Comparar com a literatura exige corpus externo (OWASP Benchmark, PyGoat).
 - Fase 7: resumo executivo em texto e JSON com metadados de execucao.
 - Fase 8: varredura ponta-a-ponta e CLI (`python -m owaspscan`).
 - Fase 9: avaliacao contra corpus rotulado (VP/FP/FN, precisao e recall).
+- Fase 10: mapa CWE -> OWASP estendido (lista oficial 2021) e consultas
+  estruturais (importacoes, configuracao, rotas).
+- Fase 11: XXE (CWE-611) em lxml e SAX.
+- Fase 12: path traversal (CWE-22) e open redirect (CWE-601) por taint.
+- Fase 13: CSRF desligado (CWE-352) e rota sem autorizacao (CWE-862).
+- Fase 14: JWT sem verificacao, hash fraco e texto puro de senha, cookies,
+  expiracao de sessao e login sem limite de tentativas.
+- Fase 15: credenciais fixas no codigo Python (CWE-798).
+- Fase 16: credenciais em arquivos de configuracao (CWE-798).

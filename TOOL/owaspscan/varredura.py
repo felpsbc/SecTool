@@ -37,7 +37,7 @@ from owaspscan.detectores.xxe import DetectorXxe
 from owaspscan.motor.catalogo import CATALOGO_PADRAO, Catalogo
 from owaspscan.motor.taint import analisar_taint
 
-VERSAO = "0.1.0"
+VERSAO = "0.2.0"
 CONFIANCA_DE_CANDIDATO = "baixa"
 
 

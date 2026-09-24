@@ -13,6 +13,14 @@ from pathlib import Path
 from owaspscan.achado import Achado
 from owaspscan.analisador import FalhaDeLeitura, analisar_diretorio
 from owaspscan.detectores.base import Detector, ordenar_achados
+from owaspscan.detectores.autenticacao import (
+    DetectorCookieInseguro,
+    DetectorExpiracaoDeSessao,
+    DetectorHashDeSenhaFraco,
+    DetectorJwtSemVerificacao,
+    DetectorLoginSemLimite,
+    DetectorSenhaEmTextoPuro,
+)
 from owaspscan.detectores.autorizacao import DetectorAutorizacao
 from owaspscan.detectores.csrf import DetectorCsrf
 from owaspscan.detectores.idor import DetectorIdor
@@ -39,6 +47,12 @@ def detectores_padrao(catalogo: Catalogo = CATALOGO_PADRAO) -> tuple[Detector, .
         DetectorOpenRedirect(catalogo=catalogo),
         DetectorCsrf(catalogo=catalogo),
         DetectorAutorizacao(catalogo=catalogo),
+        DetectorJwtSemVerificacao(catalogo=catalogo),
+        DetectorHashDeSenhaFraco(catalogo=catalogo),
+        DetectorSenhaEmTextoPuro(catalogo=catalogo),
+        DetectorCookieInseguro(catalogo=catalogo),
+        DetectorExpiracaoDeSessao(catalogo=catalogo),
+        DetectorLoginSemLimite(catalogo=catalogo),
     )
 
 

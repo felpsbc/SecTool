@@ -10,7 +10,7 @@ csrf = CSRFProtect(app)
 
 
 @app.route("/login", methods=["POST"])
-def login():
+def login():  # achado: CWE-307
     # Rota publica por natureza.
     return jsonify(autenticar(request.form["usuario"], request.form["senha"]))
 

@@ -92,6 +92,7 @@ _NEUTRALIZA_INJECAO = frozenset({"CWE-89", "CWE-79", "CWE-22", "CWE-601"})
 _NEUTRALIZA_XSS = frozenset({"CWE-79"})
 _NEUTRALIZA_TRAVERSAL = frozenset({"CWE-22"})
 _NEUTRALIZA_REDIRECT = frozenset({"CWE-601"})
+_NEUTRALIZA_TEXTO_PURO = frozenset({"CWE-256"})
 
 # Casts que trocam o tipo do valor: o resultado deixa de ser string
 # arbitraria controlada pelo atacante. Nao defendem IDOR — um inteiro
@@ -130,6 +131,20 @@ SANITIZADORES: tuple[Sanitizador, ...] = (
     Sanitizador("url_for", _NEUTRALIZA_REDIRECT, "url_for (URL interna)"),
     Sanitizador("flask.url_for", _NEUTRALIZA_REDIRECT, "url_for (URL interna)"),
     Sanitizador("reverse", _NEUTRALIZA_REDIRECT, "reverse do Django (URL interna)"),
+    # Hash de senha: tira a senha do texto puro (CWE-256). Os hashes rapidos
+    # do hashlib tambem tiram, mas sao reportados a parte como CWE-916.
+    Sanitizador("generate_password_hash", _NEUTRALIZA_TEXTO_PURO, "werkzeug"),
+    Sanitizador("make_password", _NEUTRALIZA_TEXTO_PURO, "Django make_password"),
+    Sanitizador("*.hashpw", _NEUTRALIZA_TEXTO_PURO, "bcrypt.hashpw"),
+    Sanitizador("*.hash", _NEUTRALIZA_TEXTO_PURO, "passlib/argon2 .hash()"),
+    # Cifra reversivel nao e texto puro (seria CWE-257, fora do escopo).
+    Sanitizador("*.encrypt", _NEUTRALIZA_TEXTO_PURO, "cifra/passlib .encrypt()"),
+    Sanitizador("*.pbkdf2_hmac", _NEUTRALIZA_TEXTO_PURO, "hashlib.pbkdf2_hmac"),
+    Sanitizador("*.scrypt", _NEUTRALIZA_TEXTO_PURO, "hashlib.scrypt"),
+    *(
+        Sanitizador(f"*.{nome}", _NEUTRALIZA_TEXTO_PURO, f"hashlib.{nome}")
+        for nome in ("md5", "sha1", "sha224", "sha256", "sha384", "sha512")
+    ),
 )
 
 # Manipulacao de string: nao sanitiza, mas tambem nao e caixa-preta. Passar
@@ -500,6 +515,97 @@ CONFIGURACOES_CSRF: frozenset[str] = frozenset(
 )
 
 
+# --- Autenticacao (A07) e credenciais --------------------------------------
+
+# Palavras que identificam SENHA num identificador (tokens de tokens_de_nome).
+PALAVRAS_DE_SENHA: frozenset[str] = frozenset(
+    {"password", "passwd", "pwd", "senha", "passphrase", "pass", "pw"}
+)
+
+# Funcoes de hash rapido: inadequadas para senha (CWE-916).
+HASHES_RAPIDOS: frozenset[str] = frozenset(
+    {
+        "hashlib.md5",
+        "hashlib.sha1",
+        "hashlib.sha224",
+        "hashlib.sha256",
+        "hashlib.sha384",
+        "hashlib.sha512",
+        "hashlib.sha3_256",
+        "hashlib.sha3_512",
+        "hashlib.blake2b",
+        "hashlib.blake2s",
+    }
+)
+
+# Chamadas que recebem a senha em claro e a tratam corretamente: o
+# argumento `password=` nelas nao e armazenamento em texto puro.
+CHAMADAS_QUE_TRATAM_SENHA: frozenset[str] = frozenset(
+    {
+        "create_user",
+        "create_superuser",
+        "set_password",
+        "check_password",
+        "check_password_hash",
+        "authenticate",
+        "login",
+        "verify",
+        "checkpw",
+        "generate_password_hash",
+        "make_password",
+    }
+)
+
+# Metodos de ORM que persistem um registro com os campos passados.
+METODOS_DE_PERSISTENCIA: frozenset[str] = frozenset(
+    {"create", "insert", "update", "get_or_create", "update_or_create", "insert_one"}
+)
+
+# Palavras que marcam um cookie como sensivel (nome do cookie).
+PALAVRAS_DE_COOKIE_SENSIVEL: frozenset[str] = frozenset(
+    {
+        "session",
+        "sessao",
+        "sessionid",
+        "sid",
+        "token",
+        "auth",
+        "jwt",
+        "remember",
+        "login",
+        "access",
+        "refresh",
+        "senha",
+        "password",
+    }
+)
+
+COOKIE_SECURE_CONFIG: frozenset[str] = frozenset(
+    {"SESSION_COOKIE_SECURE", "REMEMBER_COOKIE_SECURE", "CSRF_COOKIE_SECURE"}
+)
+COOKIE_HTTPONLY_CONFIG: frozenset[str] = frozenset(
+    {"SESSION_COOKIE_HTTPONLY", "REMEMBER_COOKIE_HTTPONLY"}
+)
+
+# Duracao maxima razoavel, em segundos, por chave de configuracao.
+LIMITES_DE_SESSAO: dict[str, int] = {
+    "PERMANENT_SESSION_LIFETIME": 30 * 86400,
+    "SESSION_COOKIE_AGE": 30 * 86400,
+    "JWT_ACCESS_TOKEN_EXPIRES": 86400,
+    "ACCESS_TOKEN_EXPIRE_MINUTES": 86400,
+}
+
+# Palavras de rota de login (candidatas a CWE-307).
+PALAVRAS_DE_LOGIN: frozenset[str] = frozenset(
+    {"login", "signin", "logon", "entrar", "autenticar", "authenticate", "token"}
+)
+
+# Sinais de controle de tentativas no corpo da view.
+PALAVRAS_DE_BLOQUEIO: frozenset[str] = frozenset(
+    {"attempts", "tentativas", "lockout", "bloqueio", "bloqueado", "throttle", "captcha"}
+)
+
+
 def tem_decorador_de_autorizacao(no: ast.AST) -> bool:
     """A view declara checagem de permissao por decorador?"""
     for decorador in getattr(no, "decorator_list", []):
@@ -570,10 +676,16 @@ class Catalogo:
         if not isinstance(no, ast.Call):
             return None
         pontilhado = nome_pontilhado(no.func)
-        if pontilhado is None:
-            return None
+        func = no.func
+        ultimo = func.attr if isinstance(func, ast.Attribute) else (
+            func.id if isinstance(func, ast.Name) else None
+        )
         for sanitizador in self.sanitizadores:
-            if sanitizador.rotulo == pontilhado:
+            if pontilhado is not None and sanitizador.rotulo == pontilhado:
+                return sanitizador
+            # "*.hash" casa qualquer metodo `hash`, inclusive sobre expressao:
+            # PasswordHasher().hash(senha), pwd_context.hash(senha).
+            if sanitizador.rotulo == f"*.{ultimo}":
                 return sanitizador
         return None
 

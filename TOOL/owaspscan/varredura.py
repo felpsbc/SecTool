@@ -22,6 +22,7 @@ from owaspscan.detectores.autenticacao import (
     DetectorSenhaEmTextoPuro,
 )
 from owaspscan.detectores.autorizacao import DetectorAutorizacao
+from owaspscan.detectores.credenciais import DetectorCredenciais
 from owaspscan.detectores.csrf import DetectorCsrf
 from owaspscan.detectores.idor import DetectorIdor
 from owaspscan.detectores.open_redirect import DetectorOpenRedirect
@@ -53,6 +54,7 @@ def detectores_padrao(catalogo: Catalogo = CATALOGO_PADRAO) -> tuple[Detector, .
         DetectorCookieInseguro(catalogo=catalogo),
         DetectorExpiracaoDeSessao(catalogo=catalogo),
         DetectorLoginSemLimite(catalogo=catalogo),
+        DetectorCredenciais(catalogo=catalogo),
     )
 
 

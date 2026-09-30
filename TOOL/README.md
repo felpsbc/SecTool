@@ -49,24 +49,42 @@ codigo de saida — nao seria honesto quebrar um build com base em suposicao.
 Dependencia opcional; o nucleo continua so com a stdlib.
 
     .venv/bin/python -m pip install -e ".[api]"
-    .venv/bin/uvicorn owaspscan.api:app --reload          # http://127.0.0.1:8000/docs
+    .venv/bin/python -m owaspscan.api        # http://127.0.0.1:8000/docs
 
-`POST /analisar` recebe `multipart/form-data` com codigo colado, arquivos ou os dois:
+Host e porta: `OWASPSCAN_HOST` e `OWASPSCAN_PORTA`. Origens CORS permitidas:
+`OWASPSCAN_ORIGENS` (separadas por virgula; padrao `*`).
 
-| Campo | Tipo | Descricao |
-| --- | --- | --- |
-| `codigo` | texto | codigo Python colado no site |
-| `nome` | texto | nome exibido para o codigo colado (padrao `codigo.py`) |
-| `arquivos` | arquivo (repetivel) | `.py` ou configuracao (`.env`, YAML, JSON, INI, TOML, `.properties`) |
+`POST /analisar` aceita JSON **ou** formulario — use o que for mais facil no site.
 
-    curl -X POST localhost:8000/analisar -F 'codigo=<app.py'
-    curl -X POST localhost:8000/analisar -F arquivos=@views.py -F arquivos=@.env
+**JSON** (texto colado e/ou arquivos lidos como texto):
+
+    {"codigo": "...", "nome": "app.py",
+     "arquivos": [{"nome": "views.py", "conteudo": "..."}]}
+
+```js
+const resposta = await fetch("http://127.0.0.1:8000/analisar", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ codigo: textarea.value }),
+});
+const resultado = await resposta.json();   // resultado.resumo, resultado.achados
+```
+
+**Formulario** (`multipart/form-data`, upload direto de `<input type="file" multiple>`):
+campos `codigo`, `nome` e `arquivos` (repetivel).
+
+```js
+const form = new FormData();
+for (const f of input.files) form.append("arquivos", f);
+const resultado = await (await fetch("http://127.0.0.1:8000/analisar", { method: "POST", body: form })).json();
+```
 
 A resposta e exatamente o JSON de `--json` (`para_dict`), com `raiz` igual a
-`"envio"`. O codigo enviado nunca e executado, so parseado. Nomes de arquivo
-sao reduzidos ao nome-base; limites: 50 arquivos, 1 MB cada. Erros: `400`
-(envio vazio, tipo nao suportado, nome repetido), `413` (grande demais).
-Origens CORS permitidas: variavel `OWASPSCAN_ORIGENS` (virgulas; padrao `*`).
+`"envio"`. Arquivos aceitos: `.py` e configuracao (`.env`, YAML, JSON, INI,
+TOML, `.properties`). O codigo enviado nunca e executado, so parseado. Nomes
+de arquivo sao reduzidos ao nome-base; limites: 50 arquivos, 1 MB cada.
+Erros vem como `{"detail": "..."}`: `400` envio vazio, tipo nao suportado ou
+nome repetido; `413` grande demais; `415` Content-Type errado; `422` JSON invalido.
 
 ## Testes
 

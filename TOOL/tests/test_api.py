@@ -130,3 +130,68 @@ class TestEntradaHostil:
 
 def test_saude(cliente):
     assert cliente.get("/saude").json()["status"] == "ok"
+
+
+class TestCorpoJson:
+    """Formato mais simples para o site: fetch com JSON.stringify."""
+
+    def test_codigo_colado_em_json(self, cliente):
+        resposta = cliente.post("/analisar", json={"codigo": SQLI})
+        assert resposta.status_code == 200
+        assert "CWE-89" in _cwes(resposta.json())
+
+    def test_arquivos_em_json(self, cliente):
+        arquivos = [
+            {"nome": "views.py", "conteudo": SQLI},
+            {"nome": ".env", "conteudo": 'SECRET_KEY="uma-chave-de-producao-real-9f8e7d"\n'},
+        ]
+        corpo = cliente.post("/analisar", json={"arquivos": arquivos}).json()
+        assert corpo["varredura"]["arquivos_analisados"] == 1
+        assert corpo["varredura"]["arquivos_de_configuracao"] == 1
+        assert {"CWE-89", "CWE-798"} <= _cwes(corpo)
+
+    def test_json_e_formulario_dao_o_mesmo_resultado(self, cliente):
+        via_json = cliente.post("/analisar", json={"codigo": SQLI}).json()
+        via_form = cliente.post("/analisar", data={"codigo": SQLI}).json()
+        assert via_json["achados"] == via_form["achados"]
+
+    def test_mesmas_validacoes_do_formulario(self, cliente):
+        vazio = cliente.post("/analisar", json={})
+        traversal = cliente.post(
+            "/analisar", json={"arquivos": [{"nome": "../../x.py", "conteudo": SQLI}]}
+        )
+        assert vazio.status_code == 400
+        assert {a["arquivo"] for a in traversal.json()["achados"]} == {"x.py"}
+
+    def test_json_fora_do_esquema_da_422(self, cliente):
+        assert cliente.post("/analisar", json={"arquivos": [{"nome": "a.py"}]}).status_code == 422
+
+    def test_json_malformado_da_422(self, cliente):
+        resposta = cliente.post(
+            "/analisar", content=b"{nao e json", headers={"Content-Type": "application/json"}
+        )
+        assert resposta.status_code == 422
+
+    def test_content_type_desconhecido_da_415(self, cliente):
+        resposta = cliente.post("/analisar", content=SQLI, headers={"Content-Type": "text/plain"})
+        assert resposta.status_code == 415
+
+
+class TestConexaoComSite:
+    def test_cors_libera_o_site(self, cliente):
+        resposta = cliente.options(
+            "/analisar",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+        assert resposta.status_code == 200
+        assert resposta.headers["access-control-allow-origin"] in {"*", "http://localhost:5173"}
+
+    def test_openapi_documenta_os_dois_formatos(self, cliente):
+        esquema = cliente.get("/openapi.json").json()
+        corpo = esquema["paths"]["/analisar"]["post"]["requestBody"]["content"]
+        assert {"application/json", "multipart/form-data"} <= set(corpo)
+        assert "ArquivoEnviado" in esquema["components"]["schemas"]

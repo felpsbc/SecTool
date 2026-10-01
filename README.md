@@ -121,6 +121,8 @@ Inventário arquivo a arquivo: [`docs/estrutura.md`](docs/estrutura.md).
 | [`docs/seguranca.md`](docs/seguranca.md) | mecanismos de segurança do sistema |
 | [`docs/guia-desenvolvedor.md`](docs/guia-desenvolvedor.md) | onboarding: onde investigar bugs, onde implementar |
 | [`TOOL/README.md`](TOOL/README.md) | documentação técnica do motor (cobertura, limitações, avaliação) |
+| [`frontend/README.md`](frontend/README.md) | site: como rodar e ligar à API |
+| [`docs/teste/ROTEIRO_DE_TESTE.md`](docs/teste/ROTEIRO_DE_TESTE.md) | roteiro de teste manual do site + API |
 | [`TOOL/CLAUDE.md`](TOOL/CLAUDE.md) | princípios de desenvolvimento do motor |
 
 ## Informações importantes para desenvolvedores

@@ -86,6 +86,10 @@ de arquivo sao reduzidos ao nome-base; limites: 50 arquivos, 1 MB cada.
 Erros vem como `{"detail": "..."}`: `400` envio vazio, tipo nao suportado ou
 nome repetido; `413` grande demais; `415` Content-Type errado; `422` JSON invalido.
 
+O site em `frontend/` ja consome esta API (proxy `/api` no Vite); veja
+[frontend/README.md](../frontend/README.md) e o roteiro de teste em
+[docs/teste/ROTEIRO_DE_TESTE.md](../docs/teste/ROTEIRO_DE_TESTE.md).
+
 ## Testes
 
     .venv/bin/python -m pytest -v
@@ -264,3 +268,4 @@ Comparar com a literatura exige corpus externo (OWASP Benchmark, PyGoat).
   (extra `[api]`); o nucleo continua so com a stdlib.
 - Fase 19: API aceita JSON alem de formulario e sobe com
   `python -m owaspscan.api` (ver secao "API HTTP (para o site)").
+- Fase 20: site (`frontend/`) ligado a API e roteiro de teste em `docs/teste/`.

@@ -21,3 +21,13 @@ Registre aqui as mudanças relevantes por sprint ou marco avaliativo.
 
 - Criação do repositório.
 - Definição do problema, da equipe, dos papéis e do backlog inicial.
+
+## Integração site + API
+
+- Site (`frontend/`) ligado à API do OWASP-Scan: abas Ficheiro, Código e URL
+  chamam `POST /analisar` e exibem o resultado na página (achados rastreados
+  separados dos candidatos heurísticos).
+- Proxy `/api` no Vite para desenvolvimento; `VITE_API_URL` para produção.
+- Página "Scripts de API" passa a mostrar o endpoint real.
+- Roteiro de teste com app vulnerável e resultado esperado em `docs/teste/`,
+  conferido automaticamente por `TOOL/tests/test_documento_teste.py`.

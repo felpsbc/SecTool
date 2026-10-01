@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { traducoes } from './translate';
+import { analisarArquivos, analisarCodigo, analisarUrl } from './api';
+import Resultado from './Resultado';
 
 // Ícones minimalistas
 const SunIcon = () => (
@@ -40,6 +42,13 @@ function App() {
   const [arquivos, setArquivos] = useState([]);
   const [arrastando, setArrastando] = useState(false);
   const fileInputRef = useRef(null);
+
+  // ESTADOS DA ANÁLISE (API)
+  const [codigo, setCodigo] = useState('');
+  const [url, setUrl] = useState('');
+  const [carregando, setCarregando] = useState(false);
+  const [resultado, setResultado] = useState(null);
+  const [erro, setErro] = useState('');
   
   const t = traducoes[idioma];
 
@@ -94,6 +103,27 @@ function App() {
     setArquivos((prev) => prev.filter((_, index) => index !== indexParaRemover));
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  // Chama a API e guarda o resultado (ou a mensagem de erro) para o painel
+  const analisar = async (e, chamada) => {
+    e?.stopPropagation();
+    if (carregando) return;
+    setCarregando(true);
+    setErro('');
+    setResultado(null);
+    try {
+      setResultado(await chamada());
+    } catch (falha) {
+      const mensagens = { sem_conexao: t.err_no_connection, url_inacessivel: t.err_url };
+      setErro(mensagens[falha.message] || `${t.err_prefix} ${falha.message}`);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const analisarUpload = (e) => analisar(e, () => analisarArquivos(arquivos));
+  const analisarSnippet = (e) => codigo.trim() ? analisar(e, () => analisarCodigo(codigo)) : setErro(t.err_empty);
+  const analisarLink = (e) => url.trim() ? analisar(e, () => analisarUrl(url)) : setErro(t.err_empty);
 
   const navegarPara = (e, pagina) => {
     e.preventDefault();
@@ -203,8 +233,8 @@ function App() {
                         <button onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }} className="bg-transparent border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">
                           + {idioma === 'pt' ? 'Mais' : 'More'}
                         </button>
-                        <button className="bg-transparent border border-blue-600 dark:border-green-600 text-blue-600 dark:text-green-500 hover:bg-blue-600 hover:text-white dark:hover:bg-green-600 dark:hover:text-white px-8 py-2.5 rounded-lg text-sm font-semibold transition-colors">
-                          {idioma === 'pt' ? 'Confirmar upload' : 'Confirm upload'}
+                        <button onClick={analisarUpload} disabled={carregando} className="bg-transparent border border-blue-600 dark:border-green-600 text-blue-600 dark:text-green-500 hover:bg-blue-600 hover:text-white dark:hover:bg-green-600 dark:hover:text-white px-8 py-2.5 rounded-lg text-sm font-semibold transition-colors">
+                          {carregando ? t.analyzing : (idioma === 'pt' ? 'Confirmar upload' : 'Confirm upload')}
                         </button>
                       </div>
                     </div>
@@ -218,19 +248,19 @@ function App() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
-                    <input type="text" placeholder={t.url_placeholder} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 rounded-lg py-3.5 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-green-500 focus:border-transparent transition-all shadow-inner" />
+                    <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && analisarLink(e)} placeholder={t.url_placeholder} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 rounded-lg py-3.5 pl-12 pr-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-green-500 focus:border-transparent transition-all shadow-inner" />
                   </div>
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-green-600 dark:hover:bg-green-700 text-white py-3.5 rounded-lg text-sm font-bold shadow-sm transition-colors">
-                    {t.btn_search}
+                  <button onClick={analisarLink} disabled={carregando} className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-green-600 dark:hover:bg-green-700 text-white py-3.5 rounded-lg text-sm font-bold shadow-sm transition-colors">
+                    {carregando ? t.analyzing : t.btn_search}
                   </button>
                 </div>
               )}
 
               {abaAtiva === 'snippet' && (
                 <div className="w-full flex flex-col gap-4">
-                  <textarea className="w-full h-48 bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-green-400 border border-slate-300 dark:border-slate-700 rounded-lg p-5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-green-500 resize-none shadow-inner" placeholder={t.snippet_placeholder} spellCheck="false" />
-                  <button className="self-end bg-blue-600 hover:bg-blue-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-10 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">
-                    {t.btn_scan}
+                  <textarea value={codigo} onChange={(e) => setCodigo(e.target.value)} className="w-full h-48 bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-green-400 border border-slate-300 dark:border-slate-700 rounded-lg p-5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-green-500 resize-none shadow-inner" placeholder={t.snippet_placeholder} spellCheck="false" />
+                  <button onClick={analisarSnippet} disabled={carregando} className="self-end bg-blue-600 hover:bg-blue-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-10 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">
+                    {carregando ? t.analyzing : t.btn_scan}
                   </button>
                 </div>
               )}
@@ -255,6 +285,14 @@ function App() {
               )}
             </div>
           </div>
+
+          {erro && (
+            <div className="w-full max-w-3xl mt-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl px-6 py-4 text-sm">
+              {erro}
+            </div>
+          )}
+
+          {resultado && <Resultado resultado={resultado} t={t} />}
 
           <div className="w-full max-w-2xl text-center mt-6 mb-12 px-4">
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -289,7 +327,7 @@ function App() {
       },
       scripts: {
         titulo: t.ft_scripts,
-        corpo: "Integração via Scripts de API.\n\nUtilize a nossa API REST para automatizar processos.\nEndpoint Base: https://api.aegis.dev/v1\n\nExemplo em Python (Requests):\n```python\nimport requests\n\nurl = '[https://api.aegis.dev/v1/scan](https://api.aegis.dev/v1/scan)'\nfiles = {'file': open('app.js', 'rb')}\nheaders = {'Authorization': 'Bearer SEU_TOKEN'}\n\nresponse = requests.post(url, files=files, headers=headers)\nprint(response.json())\n```"
+        corpo: "Integração via Scripts de API.\n\nA mesma análise do site está disponível por HTTP.\nEndpoint: POST http://127.0.0.1:8000/analisar (documentação interativa em /docs)\n\nExemplo em Python (Requests):\n```python\nimport requests\n\nurl = 'http://127.0.0.1:8000/analisar'\nfiles = [('arquivos', open('app.py', 'rb'))]\n\nresponse = requests.post(url, files=files)\nprint(response.json()['resumo'])\n```\n\nTambém aceita JSON: {\"codigo\": \"...\", \"nome\": \"app.py\"}"
       }
     };
 

@@ -1,16 +1,56 @@
-# React + Vite
+# AEGIS — site
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interface web (React + Vite + Tailwind) do OWASP-Scan. As análises são feitas
+pela API em [`TOOL/owaspscan/api.py`](../TOOL/owaspscan/api.py) (`POST /analisar`).
 
-Currently, two official plugins are available:
+## Rodar em desenvolvimento
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Backend, em um terminal:
 
-## React Compiler
+   ```bash
+   cd TOOL
+   .venv/bin/python -m pip install -e ".[api]"
+   .venv/bin/python -m owaspscan.api        # http://127.0.0.1:8000
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Site, em outro terminal (Node.js 20+):
 
-## Expanding the Oxlint configuration
+   ```bash
+   cd frontend
+   npm install
+   npm run dev                              # http://localhost:5173
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+O Vite repassa `/api/*` para `http://127.0.0.1:8000` (veja `vite.config.js`),
+então não precisa configurar CORS. Para apontar para outra API em
+desenvolvimento: `OWASPSCAN_API=http://host:porta npm run dev`.
+
+## Build de produção
+
+```bash
+VITE_API_URL=https://endereco-da-api npm run build    # gera dist/
+```
+
+Sem `VITE_API_URL`, o site chama `/api`, então o servidor que entrega o `dist/`
+precisa repassar `/api` para a API. Se a API estiver em outra origem, libere o
+site nela com `OWASPSCAN_ORIGENS=https://endereco-do-site`. Veja `.env.example`.
+
+## Como cada aba usa a API
+
+| Aba | Chamada |
+|-----|---------|
+| FICHEIRO | `multipart/form-data`, um campo `arquivos` por arquivo |
+| CÓDIGO | JSON `{"codigo": "...", "nome": "codigo.py"}` |
+| URL | o **navegador** baixa o arquivo (links `github.com/.../blob/...` viram `raw`) e envia o texto como JSON. A API não busca URLs, para não abrir SSRF no servidor. |
+
+O código fica em `src/api.js` (chamadas) e `src/Resultado.jsx` (painel de resultado).
+
+## Testar
+
+Roteiro manual com arquivo vulnerável e resultado esperado:
+[`docs/teste/ROTEIRO_DE_TESTE.md`](../docs/teste/ROTEIRO_DE_TESTE.md).
+
+```bash
+npm run lint
+npm run build
+```

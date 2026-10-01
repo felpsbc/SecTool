@@ -26,7 +26,25 @@ export const traducoes = {
     ft_docs_official: "Documentação Oficial",
     ft_terms: "Termos de Uso",
     ft_privacy: "Privacidade",
-    copyright: "© 2026 Aegis. Focado em análise de vulnerabilidades web e OWASP."
+    copyright: "© 2026 Aegis. Focado em análise de vulnerabilidades web e OWASP.",
+    // Resultado da análise
+    analyzing: "A analisar...",
+    res_title: "Resultado da análise",
+    res_files: "Ficheiros Python",
+    res_config: "Ficheiros de configuração",
+    res_failed: "Ficheiros com falha",
+    res_total: "Achados",
+    res_tracked: "Rastreados por taint",
+    res_candidates: "Candidatos",
+    res_candidates_note: "Estes itens NÃO afirmam vulnerabilidade: são padrões suspeitos (ex. IDOR) que exigem revisão manual.",
+    res_none: "Nenhuma vulnerabilidade encontrada nos ficheiros enviados.",
+    res_confidence: "confiança",
+    res_fix: "Recomendação:",
+    sev: { alta: "Alta", media: "Média", baixa: "Baixa" },
+    err_no_connection: "Não foi possível ligar à API. Verifique se o backend está a correr (python -m owaspscan.api).",
+    err_url: "Não foi possível descarregar o ficheiro deste URL. Use um link direto (raw) para um ficheiro .py.",
+    err_empty: "Nada para analisar.",
+    err_prefix: "Erro na análise:"
   },
   en: {
     subtitle: "Analyse suspicious files, domains, IPs and URLs to detect malware and other breaches, automatically share them with the security community.",
@@ -55,6 +73,24 @@ export const traducoes = {
     ft_docs_official: "Official Documentation",
     ft_terms: "Terms of Use",
     ft_privacy: "Privacy",
-    copyright: "© 2026 Aegis. Focused on web vulnerabilities analysis and OWASP."
+    copyright: "© 2026 Aegis. Focused on web vulnerabilities analysis and OWASP.",
+    // Scan result
+    analyzing: "Scanning...",
+    res_title: "Scan result",
+    res_files: "Python files",
+    res_config: "Configuration files",
+    res_failed: "Files with errors",
+    res_total: "Findings",
+    res_tracked: "Tracked by taint",
+    res_candidates: "Candidates",
+    res_candidates_note: "These items do NOT claim a vulnerability: they are suspicious patterns (e.g. IDOR) that need manual review.",
+    res_none: "No vulnerabilities found in the submitted files.",
+    res_confidence: "confidence",
+    res_fix: "Recommendation:",
+    sev: { alta: "High", media: "Medium", baixa: "Low" },
+    err_no_connection: "Could not reach the API. Check that the backend is running (python -m owaspscan.api).",
+    err_url: "Could not download the file from this URL. Use a direct (raw) link to a .py file.",
+    err_empty: "Nothing to scan.",
+    err_prefix: "Scan error:"
   }
 };

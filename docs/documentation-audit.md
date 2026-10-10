@@ -1,6 +1,6 @@
 # Auditoria da documentação
 
-Auditoria completa da documentação do projeto comparada com o código-fonte real. **Nenhum arquivo foi corrigido** — este documento apenas registra os achados (a correção é a etapa seguinte, `docs/plano-de-correcao.md`).
+Auditoria completa da documentação do projeto comparada com o código-fonte real. Este documento registra os achados; as correções aplicadas na etapa seguinte estão na seção **Nota pós-correção**, ao final.
 
 ## Método e limitações
 
@@ -159,3 +159,30 @@ Confirmados como corretos na auditoria (amostra representativa):
 2. A causa raiz de A1/B5 é a **renomeação manual de arquivos** sem atualização das referências — recomenda-se padronizar nomenclatura antes da etapa de correção.
 3. A causa raiz de M1/M2/B2/B3/B4 é **contagem aproximada escrita antes da verificação final** — todos os casos têm correção mecânica.
 4. Prioridade sugerida para a correção (etapa 14): A1 → M3 → M1/M2 → M4 → M5/M6 → B1–B9.
+
+---
+
+## Nota pós-correção (etapa 14)
+
+Correções aplicadas após esta auditoria, sem alteração de código-fonte:
+
+| Achado | Status | O que foi feito |
+| --- | --- | --- |
+| A1 | ✅ corrigido | links de `README.md` e `docs/guia-desenvolvedor.md` apontam para `docs/seguranca.md` |
+| B5 | ✅ corrigido | `docs/API.md` renomeado para `docs/api.md` (git mv); todas as referências cruzadas atualizadas — `docs/` agora é 100% minúsculo |
+| M1 | ✅ corrigido | "~336" substituído por "356 funções de teste (coleta pytest maior — parametrizados)" em README, arquitetura, estrutura, guia e instalacao |
+| M2 | ✅ corrigido | "11 módulos" → "10 módulos de detectores + `base`/`comum`" em README, arquitetura, estrutura, fluxos e guia |
+| M3 | ✅ corrigido | esperado da verificação 2 em `docs/instalacao.md` reescrito (amostras `seguro/` produzem achados médios/baixos e candidatos; `exit=0` por não haver severidade alta) |
+| M4 | ✅ corrigido | ficha de `owaspscan/__init__.py` adicionada a `docs/estrutura.md` (árvore + Núcleo) e menção no §5 do guia |
+| M5 | ✅ corrigido | `TOOL/README.md` §Estado completado com Fases 17-19 (conforme mensagens de commit) |
+| M6 | ✅ corrigido | `CHANGELOG.md` atualizado (motor, frontend, documentação) com fatos do histórico git |
+| B1 | ✅ corrigido | referência "(commit `a90120a`)" removida dos 6 documentos |
+| B2 | ✅ corrigido | `docs/fluxos.md`: corpus = "26 `.py` (25 analisados + 1 com erro proposital) + 9 de configuração" |
+| B3 | ✅ corrigido | `docs/estrutura.md`: catálogo é usado por "todos os 10 módulos de detectores" |
+| B4 | ✅ corrigido | `docs/estrutura.md`: dependentes de `achado.py` = "`base.py` e os 10 detectores (`comum.py` não importa)" |
+| B6 | ✅ corrigido | `docs/guia-desenvolvedor.md`: "fases 0–19 (commits individuais da Fase 10 em diante)" |
+| B7 | ✅ atenuado | porta 5173 descrita como "porta padrão do Vite / URL exibida no terminal" (instalacao, README); confirmação por execução segue pendente |
+| B8 | ⏸ não corrigido (proposital) | preencher `docs/requisitos.md` e criar ADRs exige conteúdo novo da equipe — fora do escopo "corrigir somente problemas identificados" |
+| B9 | ⏸ ressalva mantida | testes/comandos seguem não executados neste ambiente (sem `.venv`/`node_modules`); valores "Esperado:" permanecem baseados em verificação estática |
+
+Observação: os caminhos em maiúsculas citados nos achados acima (ex.: `docs/SEGURANCA.md`, `docs/API.md`) refletem o estado do repositório no momento da auditoria e foram preservados como registro histórico.

@@ -1,6 +1,6 @@
 # Fluxos do sistema
 
-Principais fluxos de negócio do AEGIS, mapeados passo a passo a partir do código (commit `a90120a`). Cada fluxo indica os arquivos responsáveis por etapa, validações, dados envolvidos e tratamento de erros.
+Principais fluxos de negócio do AEGIS, mapeados passo a passo a partir do código. Cada fluxo indica os arquivos responsáveis por etapa, validações, dados envolvidos e tratamento de erros.
 
 ## Visão geral e priorização
 
@@ -70,7 +70,7 @@ cli.main()                                    cli.py:52
 
 ### 6. Componentes participantes
 
-`__main__.py` → `cli.py` → `varredura.py` → `analisador.py` + `motor/` (taint, catalogo, estrutura, confianca, credenciais) + `detectores/` (11 módulos) + `configuracao.py` → `relatorio.py`. (Fichas individuais em `docs/estrutura.md`.)
+`__main__.py` → `cli.py` → `varredura.py` → `analisador.py` + `motor/` (taint, catalogo, estrutura, confianca, credenciais) + `detectores/` (10 detectores + base/comum) + `configuracao.py` → `relatorio.py`. (Fichas individuais em `docs/estrutura.md`.)
 
 ### 7. Como o resultado é retornado
 
@@ -166,7 +166,7 @@ Resposta `200 OK` `application/json` — exatamente o contrato de `para_dict()` 
 | código com sintaxe inválida | **200** | registrado em `varredura.falhas[]` com `motivo:"sintaxe"` (`test_api.py:58-62`) |
 | erro interno inesperado | 500 | padrão Starlette — não esperado: o motor é resiliente por construção (`FalhaDeLeitura`) |
 
-Limitações de robustez conhecidas (sem rate limiting, corpo JSON lido em memória antes do limite de tamanho): `docs/API.md` §Limitações.
+Limitações de robustez conhecidas (sem rate limiting, corpo JSON lido em memória antes do limite de tamanho): `docs/api.md` §Limitações.
 
 ---
 
@@ -214,7 +214,7 @@ Varredura (imutável) → relatorio (texto/JSON)
 2. **Recebe**: `metricas.main(argv)` — argumento é o diretório do corpus.
 3. **Validações**: diretório acessível; gabarito bem-formado (comentários `# achado: CWE-x` / `# limitacao: CWE-x` nas linhas de sink das amostras).
 4. **Funções**: `carregar_gabarito()` (`metricas.py:57`) extrai o esperado dos comentários; `varredura.executar()` roda o motor no corpus; `avaliar()` (`metricas.py:107`) confronta achados × gabarito.
-5. **Dados**: **consulta** `tests/amostras/` (25 `.py` + 9 de configuração, incluindo 1 com erro de sintaxe proposital); nada é modificado. Regra de honestidade: `# limitacao` (falha conhecida, ex.: fluxo interprocedural) **conta como falso negativo** — "declarar a falha não a transforma em acerto" (`metricas.py:9-13`).
+5. **Dados**: **consulta** `tests/amostras/` (26 `.py` — 25 analisados + 1 com erro de sintaxe proposital — e 9 arquivos de configuração); nada é modificado. Regra de honestidade: `# limitacao` (falha conhecida, ex.: fluxo interprocedural) **conta como falso negativo** — "declarar a falha não a transforma em acerto" (`metricas.py:9-13`).
 6. **Componentes**: `metricas.py` → `configuracao.descobrir_configuracoes` + `varredura.executar` (motor completo) → `achado.MAPA_CWE_OWASP` (para o universo de CWEs).
 7. **Resultado**: tabela por CWE com VP/FP/FN, precisão, recall e F1 no stdout (`formatar_tabela`, `metricas.py:148`). Valores de referência declarados: precisão 1.00, recall 0.98, F1 0.99 (corpus próprio — mede consistência interna, não generalização).
 8. **Erros**: amostra ilegível segue a resiliência do núcleo (`FalhaDeLeitura`); amostra sem gabarito simplesmente não contribui com itens esperados.
@@ -267,4 +267,4 @@ Este fluxo também alimenta os **testes automatizados**: `tests/conftest.py` usa
 
 - Implementações citadas: `TOOL/owaspscan/` (`cli.py`, `api.py`, `varredura.py`, `analisador.py`, `relatorio.py`, `achado.py`, `configuracao.py`, `metricas.py`, `motor/`, `detectores/`) e `frontend/src/`
 - Comportamentos confirmados por: `TOOL/tests/` (em especial `test_integracao.py`, `test_api.py`, `test_metricas.py`)
-- Documentos complementares: `docs/arquitetura.md` (componentes), `docs/API.md` (contrato HTTP), `docs/banco-de-dados.md` (ausência de persistência), `docs/estrutura.md` (papel de cada arquivo)
+- Documentos complementares: `docs/arquitetura.md` (componentes), `docs/api.md` (contrato HTTP), `docs/banco-de-dados.md` (ausência de persistência), `docs/estrutura.md` (papel de cada arquivo)

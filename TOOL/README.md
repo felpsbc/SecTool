@@ -259,3 +259,8 @@ Comparar com a literatura exige corpus externo (OWASP Benchmark, PyGoat).
   expiracao de sessao e login sem limite de tentativas.
 - Fase 15: credenciais fixas no codigo Python (CWE-798).
 - Fase 16: credenciais em arquivos de configuracao (CWE-798).
+- Fase 17: documentacao da cobertura ampliada e versao 0.2.0.
+- Fase 18: API HTTP (POST /analisar) com FastAPI — dependencia opcional
+  (extra `[api]`); o nucleo continua so com a stdlib.
+- Fase 19: API aceita JSON alem de formulario e sobe com
+  `python -m owaspscan.api` (ver secao "API HTTP (para o site)").

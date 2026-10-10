@@ -1,6 +1,6 @@
 # Segurança
 
-Análise da arquitetura de segurança do projeto AEGIS — documentação e compreensão da implementação existente (commit `a90120a`), sem exploração ofensiva. Tudo foi confirmado no código; os achados estão classificados em **IMPLEMENTADO**, **PARCIALMENTE IMPLEMENTADO** e **NÃO IDENTIFICADO**.
+Análise da arquitetura de segurança do projeto AEGIS — documentação e compreensão da implementação existente, sem exploração ofensiva. Tudo foi confirmado no código; os achados estão classificados em **IMPLEMENTADO**, **PARCIALMENTE IMPLEMENTADO** e **NÃO IDENTIFICADO**.
 
 ## Escopo e contexto
 
@@ -9,7 +9,7 @@ O projeto tem duas dimensões de segurança que não devem ser confundidas:
 1. **Segurança DO sistema** (objeto deste documento): como CLI, API HTTP e frontend se protegem e protegem os dados dos usuários.
 2. **Segurança como produto**: o motor `owaspscan` *detecta* 16 CWEs em código de terceiros (SQLi, XSS, IDOR, XXE, credenciais fixas etc. — ver `TOOL/README.md` §Cobertura). Isso é lógica de negócio, não mecanismo de proteção do próprio projeto, e não é reavaliado aqui.
 
-Superfície real do sistema: **CLI local** (lê disco do usuário, imprime no terminal), **API HTTP** (`TOOL/owaspscan/api.py`, FastAPI/Uvicorn, localhost por padrão) e **frontend estático** (protótipo React sem chamadas de rede). Não há banco de dados, contas de usuário, serviços externos nem comunicação de saída (ver `docs/banco-de-dados.md` e `docs/API.md`).
+Superfície real do sistema: **CLI local** (lê disco do usuário, imprime no terminal), **API HTTP** (`TOOL/owaspscan/api.py`, FastAPI/Uvicorn, localhost por padrão) e **frontend estático** (protótipo React sem chamadas de rede). Não há banco de dados, contas de usuário, serviços externos nem comunicação de saída (ver `docs/banco-de-dados.md` e `docs/api.md`).
 
 ## Resumo por dimensão
 
@@ -116,7 +116,7 @@ Padrão `127.0.0.1` (`api.py:223`) mantém a API fora da rede. Mas `OWASPSCAN_HO
 
 ### 3. Limite de tamanho — completo no multipart, tardio no JSON
 
-No multipart os tetos do Starlette limitam o que é lido do socket (`api.py:147-149,156`). No JSON, `await request.json()` carrega o **corpo inteiro em memória** (`api.py:135`) antes de `montar_envios()` aplicar o limite de 1 MB por arquivo — um corpo JSON arbitrariamente grande é alocado antes da rejeição (registrado em `docs/API.md` §Limitações). Também não há limite de tamanho total do envio (só por arquivo), nem `Content-Length` máximo no nível ASGI.
+No multipart os tetos do Starlette limitam o que é lido do socket (`api.py:147-149,156`). No JSON, `await request.json()` carrega o **corpo inteiro em memória** (`api.py:135`) antes de `montar_envios()` aplicar o limite de 1 MB por arquivo — um corpo JSON arbitrariamente grande é alocado antes da rejeição (registrado em `docs/api.md` §Limitações). Também não há limite de tamanho total do envio (só por arquivo), nem `Content-Length` máximo no nível ASGI.
 
 ### 4. Disponibilidade / abuso de recurso — proteções parciais
 
@@ -171,5 +171,5 @@ Priorizadas para o cenário de vir a expor a API além de localhost:
 - Implementação: `TOOL/owaspscan/api.py` (fronteira HTTP), `analisador.py` (resiliência), `motor/credenciais.py` (mascaramento), `relatorio.py` (saídas), `cli.py` (exit codes)
 - Testes que confirmam comportamentos: `TOOL/tests/test_api.py` (entrada hostil, CORS, não vazamento), `test_contrato.py`
 - Políticas: `SECURITY.md`, `.gitignore` (raiz)
-- Documentos relacionados: `docs/API.md` (contrato e limitações), `docs/configuracao.md` (env vars e impacto), `docs/banco-de-dados.md` (ausência de persistência), `docs/arquitetura.md` §Segurança da própria ferramenta
+- Documentos relacionados: `docs/api.md` (contrato e limitações), `docs/configuracao.md` (env vars e impacto), `docs/banco-de-dados.md` (ausência de persistência), `docs/arquitetura.md` §Segurança da própria ferramenta
 - Cobertura de detecção (produto): `TOOL/README.md` §Cobertura e §Limitações declaradas

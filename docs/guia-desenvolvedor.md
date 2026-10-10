@@ -10,7 +10,7 @@ O repositório tem 3 partes:
 
 | Parte | Onde | Estado |
 | --- | --- | --- |
-| Motor SAST (núcleo + CLI + API) | `TOOL/` | maduro, ~336 testes, 19 fases commitadas |
+| Motor SAST (núcleo + CLI + API) | `TOOL/` | maduro, 356 funções de teste, fases 0–19 (commits individuais da Fase 10 em diante) |
 | Frontend web | `frontend/` | protótipo visual — **ainda não chama a API** |
 | Documentação/gestão da disciplina | `docs/`, `sprints/`, `entregas/`, `.github/` | parcialmente preenchida |
 
@@ -52,11 +52,12 @@ Windows: troque `.venv/bin/python` por `.venv\Scripts\python`.
 `TOOL/owaspscan/` — pacote Python em camadas, sem framework web no núcleo (stdlib pura). Camadas, de baixo para cima:
 
 ```
+__init__.py      API pública do pacote (from owaspscan import executar, __version__)
 achado.py        contrato do achado + mapa CWE→OWASP (a base de tudo)
 analisador.py    leitura/parse AST resiliente
 motor/           taint.py (rastreamento) · catalogo.py (fontes/sinks/sanitizadores)
                  estrutura.py (consultas AST) · credenciais.py · confianca.py
-detectores/      11 módulos, 16 CWEs — a "lógica de detecção"
+detectores/      10 detectores + base/comum, 16 CWEs — a "lógica de detecção"
 varredura.py     orquestração (executar())
 relatorio.py     formatação texto/JSON (módulo puro)
 cli.py · api.py  entradas (terminal e HTTP)
@@ -69,7 +70,7 @@ metricas.py      autoavaliação contra corpus rotulado
 
 ## 7. Onde ficam as APIs?
 
-Uma única API HTTP: **`TOOL/owaspscan/api.py`** (FastAPI, extra opcional `[api]`). Endpoints: `POST /analisar` (JSON ou multipart; limites 50 arquivos/1 MB; erros 400/413/415/422) e `GET /saude`. Swagger gerado em `/docs`. Documentação completa: `docs/API.md`. A CLI (`cli.py`) é a outra "interface", sem HTTP.
+Uma única API HTTP: **`TOOL/owaspscan/api.py`** (FastAPI, extra opcional `[api]`). Endpoints: `POST /analisar` (JSON ou multipart; limites 50 arquivos/1 MB; erros 400/413/415/422) e `GET /saude`. Swagger gerado em `/docs`. Documentação completa: `docs/api.md`. A CLI (`cli.py`) é a outra "interface", sem HTTP.
 
 ## 8. Onde ficam as regras de negócio?
 
@@ -94,7 +95,7 @@ Ficha completa com impacto de cada uma: `docs/configuracao.md`. Não há `.env` 
 
 ## 10. Onde ficam os testes?
 
-`TOOL/tests/` — 19 arquivos pytest (~336 testes), um por camada/detector (`test_taint.py` é o maior, 38). `conftest.py` tem os atalhos (`rodar_detector`, `linhas_esperadas`). O corpus **`TOOL/tests/amostras/`** tem dupla função: fixtures e corpus de avaliação — o gabarito mora em comentários nas próprias amostras (`# achado: CWE-89` na linha do sink; `# limitacao: CWE-89 ...` para falha conhecida). **O frontend não tem nenhum teste.**
+`TOOL/tests/` — 19 arquivos pytest (356 funções de teste; coleta maior por parametrizados), um por camada/detector (`test_taint.py` é o maior, 38). `conftest.py` tem os atalhos (`rodar_detector`, `linhas_esperadas`). O corpus **`TOOL/tests/amostras/`** tem dupla função: fixtures e corpus de avaliação — o gabarito mora em comentários nas próprias amostras (`# achado: CWE-89` na linha do sink; `# limitacao: CWE-89 ...` para falha conhecida). **O frontend não tem nenhum teste.**
 
 ## 11. Onde começar a investigar um bug?
 
@@ -132,7 +133,7 @@ Ferramentas: reproduzir com `python -m owaspscan <amostra>`, isolar com os helpe
 
 ## 13. Onde alterar a API?
 
-`TOOL/owaspscan/api.py` — arquivo único (handler, validação, modelos pydantic, CORS, limites). Regras: mantenha o contrato de resposta = `relatorio.para_dict()` (a CLI e a API devolvem o mesmo JSON); limites novos viram constantes + teste em `tests/test_api.py`; o núcleo não pode ganhar dependência de FastAPI (extra `[api]` é isolado de propósito). Atualize `docs/API.md` junto.
+`TOOL/owaspscan/api.py` — arquivo único (handler, validação, modelos pydantic, CORS, limites). Regras: mantenha o contrato de resposta = `relatorio.para_dict()` (a CLI e a API devolvem o mesmo JSON); limites novos viram constantes + teste em `tests/test_api.py`; o núcleo não pode ganhar dependência de FastAPI (extra `[api]` é isolado de propósito). Atualize `docs/api.md` junto.
 
 ## 14. Onde alterar o banco?
 
@@ -146,7 +147,7 @@ Tudo em `frontend/src/App.jsx`: navegação por estado (`paginaAtual`, sem route
 
 ```bash
 cd TOOL
-.venv/bin/python -m pytest -v              # tudo (~336 testes)
+.venv/bin/python -m pytest -v              # tudo (356 funções de teste)
 .venv/bin/python -m pytest tests/test_sqli.py -v          # um arquivo
 .venv/bin/python -m pytest -k "idor" -v                   # por nome
 .venv/bin/python -m owaspscan.metricas tests/amostras     # métricas do motor (P/R/F1)
@@ -179,7 +180,7 @@ Ordem de leitura recomendada para as primeiras semanas:
 7. `TOOL/owaspscan/api.py` + `cli.py` — as duas entradas
 8. `TOOL/owaspscan/relatorio.py` — o formato de saída (contrato com consumidores)
 9. `frontend/src/App.jsx` — o frontend inteiro
-10. `docs/arquitetura.md`, `docs/estrutura.md`, `docs/API.md`, `docs/SEGURANCA.md` — o mapa documental
+10. `docs/arquitetura.md`, `docs/estrutura.md`, `docs/api.md`, `docs/seguranca.md` — o mapa documental
 
 ## 19. Quais partes são mais sensíveis?
 

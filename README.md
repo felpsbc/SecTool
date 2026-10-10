@@ -43,7 +43,7 @@ API (api.py) ──┘        │
                         ├→ analisador.py       parse AST resiliente
                         ├→ motor/taint.py      fontes → sinks, com sanitização
                         │   └ motor/catalogo.py  (fontes/sinks/sanitizadores: dado, não lógica)
-                        ├→ detectores/         11 módulos, 16 CWEs → Achado
+                        ├→ detectores/         10 detectores (+base/comum), 16 CWEs → Achado
                         ├→ configuracao.py     credenciais em .env/YAML/JSON/...
                         └→ relatorio.py        texto / JSON
 ```
@@ -72,7 +72,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e ".[api]"
 .venv/bin/python -m owaspscan.api
 
-# Frontend → http://localhost:5173
+# Frontend → URL exibida no terminal (porta padrão do Vite: 5173)
 cd frontend && npm install && npm run dev
 ```
 
@@ -86,7 +86,7 @@ Nenhuma configuração é obrigatória. A API aceita 3 variáveis de ambiente op
 
 ```bash
 cd TOOL
-.venv/bin/python -m pytest -v                        # ~336 testes
+.venv/bin/python -m pytest -v                        # 356 funções de teste (coleta maior: parametrizados)
 .venv/bin/python -m owaspscan.metricas tests/amostras  # precisão/recall/F1 do motor
 ```
 
@@ -115,10 +115,10 @@ Inventário arquivo a arquivo: [`docs/estrutura.md`](docs/estrutura.md).
 | [`docs/estrutura.md`](docs/estrutura.md) | inventário de arquivos e grafo de dependências |
 | [`docs/instalacao.md`](docs/instalacao.md) | setup do zero, verificação, problemas comuns |
 | [`docs/configuracao.md`](docs/configuracao.md) | todas as configurações e variáveis de ambiente |
-| [`docs/API.md`](docs/API.md) | contrato completo da API HTTP |
+| [`docs/api.md`](docs/api.md) | contrato completo da API HTTP |
 | [`docs/banco-de-dados.md`](docs/banco-de-dados.md) | ausência de persistência e entidades em memória |
 | [`docs/fluxos.md`](docs/fluxos.md) | fluxos de negócio passo a passo |
-| [`docs/SEGURANCA.md`](docs/SEGURANCA.md) | mecanismos de segurança do sistema |
+| [`docs/seguranca.md`](docs/seguranca.md) | mecanismos de segurança do sistema |
 | [`docs/guia-desenvolvedor.md`](docs/guia-desenvolvedor.md) | onboarding: onde investigar bugs, onde implementar |
 | [`TOOL/README.md`](TOOL/README.md) | documentação técnica do motor (cobertura, limitações, avaliação) |
 | [`TOOL/CLAUDE.md`](TOOL/CLAUDE.md) | princípios de desenvolvimento do motor |

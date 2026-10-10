@@ -1,6 +1,6 @@
 # Banco de dados / Camada de persistência
 
-Análise completa da camada de persistência do projeto AEGIS, baseada exclusivamente no código (commit `a90120a`). Verificação feita por varredura de todo o código-fonte (`TOOL/owaspscan/`, `frontend/src/`) por drivers, ORMs e APIs de armazenamento.
+Análise completa da camada de persistência do projeto AEGIS, baseada exclusivamente no código. Verificação feita por varredura de todo o código-fonte (`TOOL/owaspscan/`, `frontend/src/`) por drivers, ORMs e APIs de armazenamento.
 
 ## Conclusão central
 

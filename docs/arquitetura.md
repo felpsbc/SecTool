@@ -1,6 +1,6 @@
 # Arquitetura
 
-Documento de arquitetura real do projeto AEGIS, baseado exclusivamente no código e nos arquivos existentes no repositório (commit `a90120a`). Substitui o template genérico anterior.
+Documento de arquitetura real do projeto AEGIS, baseado exclusivamente no código e nos arquivos existentes no repositório. Substitui o template genérico anterior.
 
 ## Contexto técnico
 
@@ -8,7 +8,7 @@ O AEGIS é uma ferramenta de análise estática de segurança (SAST) para códig
 
 | Parte | Localização | Stack | Estado |
 | --- | --- | --- | --- |
-| Motor SAST (núcleo + CLI + API) | `TOOL/owaspscan/` | Python 3.11+, stdlib apenas no núcleo; FastAPI opcional | Maduro, 19 fases, ~336 testes |
+| Motor SAST (núcleo + CLI + API) | `TOOL/owaspscan/` | Python 3.11+, stdlib apenas no núcleo; FastAPI opcional | Maduro, 19 fases, 356 funções de teste |
 | Frontend web | `frontend/` | React 19, Vite 8, Tailwind CSS 3 | Protótipo visual, **não integrado à API** |
 | Gestão acadêmica | `docs/`, `sprints/`, `entregas/`, `.github/` | Markdown | Maioria em estado de template |
 
@@ -57,7 +57,7 @@ Camadas do núcleo, da base para o topo:
 1. **Contrato** (`achado.py`) — tipo `Achado` e mapa CWE→OWASP canônico.
 2. **AST** (`analisador.py`) — descoberta, parse resiliente, localização de nós.
 3. **Motor** (`motor/`) — taint, catálogo declarativo, consultas estruturais, regras de credenciais, calibração de confiança.
-4. **Detectores** (`detectores/`) — 11 módulos que interpretam o motor e emitem achados.
+4. **Detectores** (`detectores/`) — 10 módulos de detectores (mais `base` e `comum`, de apoio) que interpretam o motor e emitem achados.
 5. **Orquestração** (`varredura.py`) — monta o pipeline completo.
 6. **Saída** (`relatorio.py`) — formatação pura em texto/JSON.
 7. **Entradas** (`cli.py`, `api.py`) — interfaces de usuário.
@@ -105,7 +105,7 @@ A varredura é CPU-bound e roda via `run_in_threadpool`, fora do event loop (`ap
 | Localização | `TOOL/owaspscan/varredura.py` |
 | Responsabilidade | Pipeline completo: `executar(raiz)` descobre e analisa arquivos Python, roda taint + 15 detectores por arquivo, lê arquivos de configuração e roda o detector de credenciais sobre eles, agregando tudo no dataclass imutável `Varredura` (achados ordenados por arquivo/linha/CWE, contadores de arquivos, falhas de leitura, momento, versão). Propriedades derivadas: `confirmados` (taint), `candidatos` (heurísticos), `tem_severidade_alta` |
 | Dependências | stdlib apenas |
-| Utiliza | `analisador`, `configuracao`, `motor.catalogo` (`CATALOGO_PADRAO`), `motor.taint`, `detectores.base` (Protocol `Detector` + `ordenar_achados`) e todos os 11 módulos de detectores |
+| Utiliza | `analisador`, `configuracao`, `motor.catalogo` (`CATALOGO_PADRAO`), `motor.taint`, `detectores.base` (Protocol `Detector` + `ordenar_achados`) e todos os 10 módulos de detectores |
 | Utilizado por | `cli.py`, `api.py`, `metricas.py`, testes |
 
 `detectores_padrao()` (`varredura.py:44-62`) fixa a ordem dos 15 detectores no relatório. Separação deliberada: `varredura.py` faz I/O e execução; `relatorio.py` só formata.
@@ -183,7 +183,7 @@ Adicionar suporte a um framework = acrescentar entradas aqui, **sem tocar em `ta
 
 | | |
 | --- | --- |
-| Localização | `TOOL/owaspscan/detectores/` (11 módulos) |
+| Localização | `TOOL/owaspscan/detectores/` (10 módulos de detectores + `base.py`/`comum.py` de apoio) |
 | Responsabilidade | Interpretar os escopos do taint e/ou a estrutura da AST e emitir `list[Achado]` via `criar_achado`. Um detector não anda na AST por conta própria nem decide classificação (contrato em `base.py`: Protocol `Detector` com `detectar(arquivo, escopos)`) |
 | Utilizados por | `varredura.detectores_padrao()` |
 
@@ -247,7 +247,7 @@ O contrato de integração futuro já está definido no `TOOL/README.md` (seçã
 
 | | |
 | --- | --- |
-| Localização | `TOOL/tests/` (19 arquivos, ~336 funções `test_*`) |
+| Localização | `TOOL/tests/` (19 arquivos, 356 funções `test_*` — coleta pytest maior, há parametrizados) |
 | Responsabilidade | Cobrem todas as camadas: contrato, analisador, taint (38 testes), sanitização, cada detector, relatório, configuração, API (26 testes), integração ponta-a-ponta e métricas. `conftest.py` expõe atalhos de gabarito. `tests/amostras/` é o corpus rotulado (vulneravel/, seguro/, analisador/, config/) — as amostras de `seguro/` são seguras **para a CWE que nomeiam**, não para todas |
 | Execução | `.venv/bin/python -m pytest -v` em `TOOL/` |
 | Lacuna | Frontend sem nenhum teste |
@@ -378,7 +378,7 @@ Registradas em `TOOL/CLAUDE.md`, docstrings e READMEs (ainda sem ADRs formais em
 2. **Frontend descreve produto diferente**: textos de `translate.js`/`App.jsx` prometem análise de malware/URLs/domínios/IPs, suporte a JavaScript/PHP/C++, CLI npm `@aegis/cli` e API `api.aegis.dev` — nada disso existe; o motor analisa somente Python/configuração.
 3. **Identidade dupla**: README raiz ("AEGIS-CODE", com pre-commit hook e bloqueio de merge em CI) vs `TOOL/README.md` ("OWASP-Scan", iniciação científica). Hook de pre-commit e integração de CI citados no README raiz não estão implementados.
 4. **API sem autenticação nem rate limit** — aceitável em localhost, não em deployment público.
-5. **Sem CI/CD** — os ~336 testes só rodam localmente.
+5. **Sem CI/CD** — as 356 funções de teste (mais com parametrização) só rodam localmente.
 6. **Documentação de gestão vazia** — `docs/requisitos.md` segue template, CHANGELOG para na Sprint 00 apesar de 19 fases, `TOOL/README.md` lista "Estado" até a Fase 16 (git mostra Fase 19), LICENSE é placeholder institucional.
 7. **Sem testes de frontend** e UI inteira em um único arquivo de 382 linhas.
 8. **Limitações do motor** (intraprocedural, insensível a fluxo, cego a templates) são conhecidas, declaradas e medidas como FN pela avaliação — não são defeitos ocultos, mas restringem o uso como única barreira de segurança.

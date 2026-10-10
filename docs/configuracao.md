@@ -1,6 +1,6 @@
 # Configuração
 
-Todas as configurações utilizadas pelo projeto AEGIS, com finalidade, obrigatoriedade, exemplos seguros e impacto em caso de erro. Inventário confirmado por varredura do repositório (commit `a90120a`): nenhum arquivo de configuração foi omitido, e nenhuma credencial real é exposta neste documento.
+Todas as configurações utilizadas pelo projeto AEGIS, com finalidade, obrigatoriedade, exemplos seguros e impacto em caso de erro. Inventário confirmado por varredura do repositório: nenhum arquivo de configuração foi omitido, e nenhuma credencial real é exposta neste documento.
 
 ## Visão geral
 

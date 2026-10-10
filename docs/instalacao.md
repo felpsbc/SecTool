@@ -159,7 +159,7 @@ cd TOOL
 
 ```bash
 cd frontend
-npm run dev        # servidor de desenvolvimento (URL exibida no terminal, padrão http://localhost:5173)
+npm run dev        # servidor de desenvolvimento (a URL vem no terminal; porta padrão do Vite: 5173)
 npm run build      # build de produção em dist/
 npm run preview    # serve o build localmente
 npm run lint       # oxlint
@@ -176,7 +176,7 @@ cd TOOL
 
 Execute em ordem; cada passo tem resultado esperado determinado pelos arquivos do projeto.
 
-**1. Testes do TOOL** (~336 testes):
+**1. Testes do TOOL** (356 funções de teste; coleta pytest maior — parametrizados):
 
 ```bash
 cd TOOL && .venv/bin/python -m pytest -v
@@ -191,7 +191,7 @@ Esperado: todos passam, sem erros de coleta.
 .venv/bin/python -m owaspscan tests/amostras/seguro ; echo "exit=$?"
 ```
 
-Esperado: a primeira imprime relatório com achados (SQL Injection, XSS, credenciais etc.) e `exit=1`; a segunda tem seção de achados vazia/sem severidade alta e `exit=0`.
+Esperado: a primeira imprime relatório com achados de severidade alta (SQL Injection, credenciais fixas etc.) e `exit=1`; a segunda **também produz achados** — de severidade média/baixa e candidatos heurísticos, pois as amostras de `seguro/` são seguras apenas para a CWE que nomeiam (`TOOL/README.md` §Avaliação; ex.: `seguro/flask_xss.py` tem um open redirect CWE-601 rotulado no gabarito) — mas `exit=0`, por não haver achado de severidade alta.
 
 **3. Métricas batem com o declarado** (`TOOL/README.md` §Avaliação):
 

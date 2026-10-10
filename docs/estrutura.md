@@ -1,6 +1,6 @@
 # Estrutura de arquivos
 
-Inventário técnico do repositório AEGIS: organização de diretórios, papel de cada arquivo relevante, grafo de dependências e trilha de leitura recomendada. Baseado exclusivamente no código existente (commit `a90120a`). Arquivos irrelevantes para compreensão (caches, `node_modules`, gerados, `package-lock.json`, binários e assets) estão listados na seção [Exclusões](#exclusões).
+Inventário técnico do repositório AEGIS: organização de diretórios, papel de cada arquivo relevante, grafo de dependências e trilha de leitura recomendada. Baseado exclusivamente no código existente. Arquivos irrelevantes para compreensão (caches, `node_modules`, gerados, `package-lock.json`, binários e assets) estão listados na seção [Exclusões](#exclusões).
 
 ## Visão geral da organização
 
@@ -20,6 +20,7 @@ AEGIS/
 │   ├── CLAUDE.md              # princípios de desenvolvimento inegociáveis
 │   ├── pyproject.toml         # pacote, extras [api]/[dev], config do pytest
 │   ├── owaspscan/             # código-fonte (camadas: contrato→AST→motor→detectores→saída→entradas)
+│   │   ├── __init__.py        # API pública do pacote (exports + __version__)
 │   │   ├── achado.py          # contrato central de achado + mapa CWE→OWASP
 │   │   ├── analisador.py      # camada AST (descoberta, parse resiliente, localização)
 │   │   ├── configuracao.py    # leitores de .env/YAML/JSON/INI/TOML/.properties
@@ -35,13 +36,13 @@ AEGIS/
 │   │   │   ├── estrutura.py   # consultas estruturais sobre a AST
 │   │   │   ├── credenciais.py # regras de reconhecimento de segredos (CWE-798)
 │   │   │   └── confianca.py   # calibração alta/média/baixa
-│   │   └── detectores/        # 11 módulos, 16 CWEs
+│   │   └── detectores/        # 10 detectores + base/comum, 16 CWEs
 │   │       ├── base.py        # Protocol Detector + ordenação
 │   │       ├── comum.py       # helpers de sink por argumento
 │   │       ├── sqli.py  xss.py  idor.py  xxe.py
 │   │       ├── path_traversal.py  open_redirect.py  csrf.py
 │   │       ├── autorizacao.py  autenticacao.py  credenciais.py
-│   └── tests/                 # pytest (~336 testes) + corpus rotulado
+│   └── tests/                 # pytest (356 funções de teste) + corpus rotulado
 │       ├── conftest.py        # atalhos de gabarito para os testes
 │       ├── test_*.py          # 19 arquivos, um por camada/detector
 │       └── amostras/          # corpus de avaliação (vulneravel/, seguro/, analisador/, config/)
@@ -90,6 +91,14 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 
 ### Núcleo — contrato e AST
 
+#### `TOOL/owaspscan/__init__.py` (17 linhas)
+
+- **Função**: API pública do pacote.
+- **Responsabilidade**: reexportar os símbolos de uso programático — `Achado`, `criar_achado`, `MAPA_CWE_OWASP` (de `achado.py`) e `Varredura`, `executar`, `VERSAO` (de `varredura.py`) — e definir `__version__ = VERSAO`. Permite `from owaspscan import executar` sem conhecer os módulos internos.
+- **Principais símbolos**: `__all__ = ["Achado", "criar_achado", "MAPA_CWE_OWASP", "Varredura", "executar"]`, `__version__`.
+- **Depende de**: `achado.py`, `varredura.py`.
+- **Dependentes**: qualquer código que importe o pacote (`import owaspscan` / `from owaspscan import ...`); o código interno usa imports diretos dos módulos.
+
 #### `TOOL/owaspscan/achado.py` (218 linhas)
 
 - **Função**: contrato interno de achado — o tipo que atravessa todo o sistema.
@@ -97,7 +106,7 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 - **Principais classes/funções**: `ClasseVulnerabilidade`, `MAPA_CWE_OWASP`, `CAMPOS_CONTRATO`, `ClassificacaoInvalida`, `Achado`, `criar_achado()`, `campos_do_achado()`.
 - **Dependências**: stdlib apenas (`dataclasses`, `typing`).
 - **Depende de**: nada — é a base do sistema.
-- **Dependentes**: todos os 11 módulos de `detectores/`, `relatorio.py`, `metricas.py`, `tests/test_contrato.py` (protege o mapa) e `tests/test_relatorio.py`.
+- **Dependentes**: `detectores/base.py` e os 10 módulos de detectores (`comum.py` não importa `achado`), `relatorio.py`, `metricas.py`, `tests/test_contrato.py` (protege o mapa) e `tests/test_relatorio.py`.
 
 #### `TOOL/owaspscan/analisador.py` (183 linhas)
 
@@ -117,7 +126,7 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 - **Principais classes/funções**: `FonteDeDados`, `SinkSql`, `Sanitizador`, `SinkXss`, `SinkDeArgumento`, `Catalogo`, `CATALOGO_PADRAO`, `nome_pontilhado()`, `e_view_de_rota()`, `tem_decorador_de_autorizacao()`, `nomes_de_parametros_de_rota()`.
 - **Dependências**: stdlib (`ast`, `dataclasses`).
 - **Depende de**: nada.
-- **Dependentes**: `motor/taint.py`, `motor/estrutura.py`, `motor/confianca.py`, `varredura.py`, `detectores/comum.py` e 9 dos 11 detectores.
+- **Dependentes**: `motor/taint.py`, `motor/estrutura.py`, `motor/confianca.py`, `varredura.py`, `detectores/comum.py` e todos os 10 módulos de detectores.
 
 #### `motor/taint.py` (414 linhas)
 
@@ -261,7 +270,7 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 - **Responsabilidade**: `executar(raiz)` analisa diretório/arquivo, roda taint + 15 detectores por arquivo Python, lê configurações e roda o detector de credenciais nelas, agregando em `Varredura` (achados ordenados, contadores, falhas, momento, versão). I/O mora aqui; formatação mora em `relatorio.py`.
 - **Principais classes/funções**: `VERSAO` ("0.2.0"), `CONFIANCA_DE_CANDIDATO`, `detectores_padrao()`, `Varredura` (`confirmados`, `candidatos`, `tem_severidade_alta`), `executar()`.
 - **Dependências**: stdlib (`dataclasses`, `datetime`, `pathlib`).
-- **Depende de**: `achado`, `analisador`, `configuracao`, `motor/catalogo`, `motor/taint` e **todos os 11 módulos de detectores** — é o único arquivo que conhece tudo.
+- **Depende de**: `achado`, `analisador`, `configuracao`, `motor/catalogo`, `motor/taint` e **todos os 10 módulos de detectores** — é o único arquivo que conhece tudo.
 - **Dependentes**: `cli.py`, `api.py`, `relatorio.py`, `metricas.py`, `tests/` (integracao, metricas, configuracao).
 
 #### `TOOL/owaspscan/relatorio.py` (213 linhas)
@@ -320,7 +329,7 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 - **Principais funções**: `linhas_esperadas()`, `linhas_de_limitacao()`, `rodar_detector()` (código em memória), `rodar_detector_em_arquivo()` (amostra do corpus).
 - **Depende de**: `metricas.py`, `analisador.py`, `motor/taint.py`.
 
-#### Arquivos de teste (19, ~336 testes)
+#### Arquivos de teste (19, 356 `def test`; coleta maior por parametrizados)
 
 | Arquivo | Cobre | Testes |
 | --- | --- | --- |

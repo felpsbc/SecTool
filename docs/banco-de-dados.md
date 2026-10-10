@@ -152,4 +152,4 @@ A "consulta" mais próxima de uma query no sistema é `literais_de_string()` (`m
 - `TOOL/owaspscan/motor/catalogo.py` (sinks SQL — análise, não uso)
 - `TOOL/tests/test_api.py:53-62` (não vazamento de caminho, falha de sintaxe como dado)
 - `frontend/src/App.jsx:33,61` (localStorage)
-- `docs/arquitetura.md` §Dados e armazenamento · `docs/CONFIGURACAO.md` §Ausências confirmadas
+- `docs/arquitetura.md` §Dados e armazenamento · `docs/configuracao.md` §Ausências confirmadas

@@ -201,6 +201,6 @@ Os arquivos de configuração em `TOOL/tests/amostras/*/config/` (`.env`, `.env.
 ## Referências
 
 - Arquitetura e decisões: `docs/arquitetura.md`
-- Instalação passo a passo: `docs/INSTALACAO.md`
+- Instalação passo a passo: `docs/instalacao.md`
 - Contrato e exemplos da API: `TOOL/README.md` §"API HTTP (para o site)"
 - Política de segredos: `SECURITY.md`

@@ -284,7 +284,7 @@ Em camadas, toda em `api.py`:
 
 ### CORS em desenvolvimento
 
-Padrão `*` permite que o frontend Vite (`http://localhost:5173`) chame a API sem configuração. Para restringir: `OWASPSCAN_ORIGENS=http://localhost:5173` (detalhes em `docs/CONFIGURACAO.md` §1).
+Padrão `*` permite que o frontend Vite (`http://localhost:5173`) chame a API sem configuração. Para restringir: `OWASPSCAN_ORIGENS=http://localhost:5173` (detalhes em `docs/configuracao.md` §1).
 
 ---
 
@@ -326,5 +326,5 @@ analisar(request)                                   api.py:191
 - Guia de uso resumido: `TOOL/README.md` §"API HTTP (para o site)"
 - Contrato do achado (campos da resposta): `TOOL/owaspscan/achado.py`
 - Estrutura do JSON: `TOOL/owaspscan/relatorio.py` (`para_dict`)
-- Variáveis de ambiente: `docs/CONFIGURACAO.md` §1
+- Variáveis de ambiente: `docs/configuracao.md` §1
 - Contexto de arquitetura: `docs/arquitetura.md`

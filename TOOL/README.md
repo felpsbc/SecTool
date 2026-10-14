@@ -299,3 +299,10 @@ Comparar com a literatura exige corpus externo (OWASP Benchmark, PyGoat).
 - Fase 19: API aceita JSON alem de formulario e sobe com
   `python -m owaspscan.api` (ver secao "API HTTP (para o site)").
 - Fase 20: site (`frontend/`) ligado a API e roteiro de teste em `docs/teste/`.
+- Fase 21: comando `owasp-scan` instalado via `[project.scripts]`.
+- Fase 22: motor poliglota sobre tree-sitter (extra opcional `[linguagens]`)
+  e perfil JavaScript/TypeScript.
+- Fase 23: perfil Java (Servlet, Spring, JDBC/JPA) com XXE, cookie e CSRF.
+- Fase 24: perfil PHP (mysqli/PDO, Laravel, WordPress).
+- Fase 25: HTML (JavaScript embutido e formularios sem token CSRF).
+- Fase 26: API, CLI e site aceitam as novas linguagens.

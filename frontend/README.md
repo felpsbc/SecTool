@@ -1,4 +1,4 @@
-# AEGIS — site
+# AEGIS - site
 
 Interface web (React + Vite + Tailwind) do OWASP-Scan. As análises são feitas
 pela API em [`TOOL/owaspscan/api.py`](../TOOL/owaspscan/api.py) (`POST /analisar`).

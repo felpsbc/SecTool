@@ -7,12 +7,14 @@ from owaspscan.poliglota.detector import DetectorPoliglota
 from owaspscan.poliglota.fonte import ArquivoPoliglota
 from owaspscan.poliglota.java import PERFIL_JAVA
 from owaspscan.poliglota.javascript import PERFIL_JAVASCRIPT
+from owaspscan.poliglota.php import PERFIL_PHP
 
 PERFIS = {
     "javascript": PERFIL_JAVASCRIPT,
     "typescript": PERFIL_JAVASCRIPT,
     "tsx": PERFIL_JAVASCRIPT,
     "java": PERFIL_JAVA,
+    "php": PERFIL_PHP,
 }
 
 

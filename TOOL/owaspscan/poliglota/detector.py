@@ -168,7 +168,11 @@ class DetectorPoliglota:
         candidatos: list[tuple[str, object]] = []
         atribuicao = perfil.atribuicao(no)
         if atribuicao is not None:
-            candidatos += [(alvo.split(".")[-1], atribuicao.valor) for alvo in atribuicao.alvos]
+            # "$senha" (PHP) e "this.senha" viram so "senha"
+            candidatos += [
+                (alvo.split(".")[-1].lstrip("$"), atribuicao.valor)
+                for alvo in atribuicao.alvos
+            ]
         par = perfil.pares_de_credencial(no)
         if par is not None:
             candidatos.append(par)

@@ -5,12 +5,14 @@ from __future__ import annotations
 from owaspscan.achado import Achado
 from owaspscan.poliglota.detector import DetectorPoliglota
 from owaspscan.poliglota.fonte import ArquivoPoliglota
+from owaspscan.poliglota.java import PERFIL_JAVA
 from owaspscan.poliglota.javascript import PERFIL_JAVASCRIPT
 
 PERFIS = {
     "javascript": PERFIL_JAVASCRIPT,
     "typescript": PERFIL_JAVASCRIPT,
     "tsx": PERFIL_JAVASCRIPT,
+    "java": PERFIL_JAVA,
 }
 
 

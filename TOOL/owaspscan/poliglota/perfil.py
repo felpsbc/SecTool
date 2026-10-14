@@ -102,6 +102,9 @@ class Perfil:
         default=lambda no: None
     )  # chave literal => valor ({password: "x"}, 'senha' => 'x')
     condicoes: frozenset[str] = frozenset()  # tipos de no de `if` (guardas)
+    # Detectores estruturais da linguagem (configuracao insegura, nao taint):
+    # recebem (arquivo, escopos) e devolvem achados prontos.
+    estruturais: Callable[[object, list], list] = field(default=lambda arquivo, escopos: [])
 
     def sanitizador(self, nome: str | None) -> tuple[str, frozenset[str]] | None:
         padrao = casa_algum(self.sanitizadores, nome)

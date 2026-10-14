@@ -87,7 +87,9 @@ class DetectorPoliglota:
                     achados.setdefault(chave, achado)
                 for chave, achado in self._credenciais(arquivo, no):
                     achados.setdefault(chave, achado)
-        return list(achados.values())
+        resultado = list(achados.values())
+        resultado += self.perfil.estruturais(arquivo, escopos)
+        return resultado
 
     # -- injecao -----------------------------------------------------------
 

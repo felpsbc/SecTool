@@ -37,7 +37,7 @@ Por isso "hash fraco de senha", tema de autenticacao, aparece em A02.
 ## Outras linguagens
 
 Alem de Python, a ferramenta analisa JavaScript/TypeScript (Node/Express,
-Koa, DOM, React). Como a stdlib so tem parser de Python, essas linguagens usam
+Koa, DOM, React) e Java (Servlet, Spring MVC/Security, JDBC/JPA). Como a stdlib so tem parser de Python, essas linguagens usam
 o tree-sitter, instalado pelo extra opcional `[linguagens]`; sem ele, o nucleo
 continua funcionando e os arquivos dessas linguagens aparecem no relatorio como
 falha de leitura com motivo `dependencia`.
@@ -49,6 +49,7 @@ taint tracking intraprocedural, nunca regex. Cada linguagem e um perfil em
 | Linguagem | Extensoes | CWEs |
 | --- | --- | --- |
 | JavaScript / TypeScript | .js .mjs .cjs .jsx .ts .tsx | 89, 79, 22, 601, 798 |
+| Java (Servlet, Spring, JDBC/JPA) | .java | 89, 79, 22, 601, 798, 611, 614, 1004, 352 |
 
 Arquivos gerados (`.min.js`, `.bundle.js`, `.d.ts`), `node_modules` e
 arquivos acima de 1 MB ficam de fora.

@@ -7,7 +7,8 @@ OWASP Top 10, começando por SQLi, XSS e IDOR. Emite um resumo
 executivo dos achados.
 
 ## Princípio arquitetural (NÃO VIOLAR)
-- Detecção baseada em AST (módulo `ast` da stdlib), NUNCA regex frágil.
+- Detecção baseada em AST (módulo `ast` da stdlib para Python; árvore do
+  tree-sitter para JS/TS, Java, PHP e HTML), NUNCA regex frágil.
 - O motor é taint tracking: rastreia dados de FONTES não confiáveis
   até SINKS perigosos, verificando se há SANITIZAÇÃO no caminho.
 - Cada achado é normalizado para uma CWE e mapeado ao OWASP Top 10.
@@ -18,6 +19,10 @@ executivo dos achados.
 
 ## Stack
 - Python 3.11+, apenas stdlib no núcleo (ast, dataclasses, json, pathlib).
+- Outras linguagens: tree-sitter como extra OPCIONAL `[linguagens]`, em
+  `owaspscan/poliglota/`. Sem ele o núcleo roda e esses arquivos viram
+  falha de leitura com motivo "dependencia". Cada linguagem é um `Perfil`
+  (fontes, sinks, sanitizadores) sobre o motor de taint genérico.
 - Testes com pytest. Sem frameworks web, sem dependências pesadas.
 
 ## Formato do achado (contrato interno, fixo)

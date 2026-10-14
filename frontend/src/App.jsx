@@ -30,6 +30,16 @@ const AIcon = ({ size = "normal" }) => {
   );
 };
 
+// Linguagem do codigo colado: a API decide o analisador pela extensao do nome.
+const LINGUAGENS = [
+  ['.py', 'Python'],
+  ['.js', 'JavaScript'],
+  ['.ts', 'TypeScript'],
+  ['.java', 'Java'],
+  ['.php', 'PHP'],
+  ['.html', 'HTML'],
+];
+
 function App() {
   const [idioma, setIdioma] = useState('pt');
   const [tema, setTema] = useState(() => localStorage.getItem('aegis-tema') || 'dark');
@@ -45,6 +55,7 @@ function App() {
 
   // ESTADOS DA ANÁLISE (API)
   const [codigo, setCodigo] = useState('');
+  const [extensao, setExtensao] = useState('.py');
   const [url, setUrl] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [resultado, setResultado] = useState(null);
@@ -122,7 +133,7 @@ function App() {
   };
 
   const analisarUpload = (e) => analisar(e, () => analisarArquivos(arquivos));
-  const analisarSnippet = (e) => codigo.trim() ? analisar(e, () => analisarCodigo(codigo)) : setErro(t.err_empty);
+  const analisarSnippet = (e) => codigo.trim() ? analisar(e, () => analisarCodigo(codigo, `codigo${extensao}`)) : setErro(t.err_empty);
   const analisarLink = (e) => url.trim() ? analisar(e, () => analisarUrl(url)) : setErro(t.err_empty);
 
   const navegarPara = (e, pagina) => {
@@ -258,6 +269,9 @@ function App() {
 
               {abaAtiva === 'snippet' && (
                 <div className="w-full flex flex-col gap-4">
+                  <select value={extensao} onChange={(e) => setExtensao(e.target.value)} aria-label={t.snippet_language} className="self-start bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-green-500">
+                    {LINGUAGENS.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}
+                  </select>
                   <textarea value={codigo} onChange={(e) => setCodigo(e.target.value)} className="w-full h-48 bg-slate-50 dark:bg-[#0b1120] text-slate-800 dark:text-green-400 border border-slate-300 dark:border-slate-700 rounded-lg p-5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-green-500 resize-none shadow-inner" placeholder={t.snippet_placeholder} spellCheck="false" />
                   <button onClick={analisarSnippet} disabled={carregando} className="self-end bg-blue-600 hover:bg-blue-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-10 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">
                     {carregando ? t.analyzing : t.btn_scan}
@@ -323,7 +337,7 @@ function App() {
       },
       faq: {
         titulo: t.ft_faq,
-        corpo: "Perguntas Frequentes (FAQ)\n\n• O AEGIS é gratuito?\nSim, o uso comunitário web é inteiramente gratuito.\n\n• Que linguagens são suportadas no Snippet?\nNeste momento, o nosso motor SAST suporta JavaScript, Python, PHP e C++.\n\n• Posso apagar os meus relatórios?\nPor padrão, não gravamos dados persistentes, mas utilizadores autenticados terão total controlo sobre o histórico de auditorias."
+        corpo: "Perguntas Frequentes (FAQ)\n\n• O AEGIS é gratuito?\nSim, o uso comunitário web é inteiramente gratuito.\n\n• Que linguagens são suportadas no Snippet?\nNeste momento, o nosso motor SAST suporta Python, JavaScript/TypeScript, Java, PHP e HTML.\n\n• Posso apagar os meus relatórios?\nPor padrão, não gravamos dados persistentes, mas utilizadores autenticados terão total controlo sobre o histórico de auditorias."
       },
       scripts: {
         titulo: t.ft_scripts,

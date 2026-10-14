@@ -195,3 +195,23 @@ class TestConexaoComSite:
         corpo = esquema["paths"]["/analisar"]["post"]["requestBody"]["content"]
         assert {"application/json", "multipart/form-data"} <= set(corpo)
         assert "ArquivoEnviado" in esquema["components"]["schemas"]
+
+
+class TestOutrasLinguagens:
+    """Fase 26: a API aceita os arquivos das linguagens do motor poliglota."""
+
+    @pytest.mark.parametrize(
+        "nome,codigo,cwe",
+        [
+            ("app.js", 'db.query("SELECT " + req.query.id);', "CWE-89"),
+            ("S.java", 'class S { void f(HttpServletRequest request) { '
+             'response.sendRedirect(request.getParameter("u")); } }', "CWE-601"),
+            ("p.php", '<?php echo $_GET["x"];', "CWE-79"),
+            ("i.html", "<script>document.write(location.hash)</script>", "CWE-79"),
+        ],
+    )
+    def test_codigo_colado_usa_a_extensao_do_nome(self, cliente, nome, codigo, cwe):
+        pytest.importorskip("tree_sitter")
+        corpo = cliente.post("/analisar", json={"codigo": codigo, "nome": nome}).json()
+        assert [a["cwe"] for a in corpo["achados"]] == [cwe]
+        assert corpo["achados"][0]["arquivo"] == nome

@@ -76,13 +76,15 @@ codigo de saida — nao seria honesto quebrar um build com base em suposicao.
 
 Dependencia opcional; o nucleo continua so com a stdlib.
 
-    .venv/bin/python -m pip install -e ".[api]"
+    .venv/bin/python -m pip install -e ".[api,linguagens]"
     .venv/bin/python -m owaspscan.api        # http://127.0.0.1:8000/docs
 
 Host e porta: `OWASPSCAN_HOST` e `OWASPSCAN_PORTA`. Origens CORS permitidas:
 `OWASPSCAN_ORIGENS` (separadas por virgula; padrao `*`).
 
 `POST /analisar` aceita JSON **ou** formulario — use o que for mais facil no site.
+A linguagem de cada arquivo (e do codigo colado) vem da extensao do `nome`:
+`{"codigo": "...", "nome": "app.js"}` e analisado como JavaScript.
 
 **JSON** (texto colado e/ou arquivos lidos como texto):
 

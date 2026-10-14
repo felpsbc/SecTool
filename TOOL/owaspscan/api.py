@@ -34,6 +34,7 @@ from pydantic import BaseModel, Field, ValidationError
 from starlette.datastructures import UploadFile
 
 from owaspscan.configuracao import formato_de
+from owaspscan.poliglota.fonte import linguagem_de
 from owaspscan.relatorio import para_dict
 from owaspscan.varredura import VERSAO, executar
 
@@ -54,7 +55,9 @@ class ArquivoEnviado(BaseModel):
 class Envio(BaseModel):
     """Corpo JSON de POST /analisar."""
 
-    codigo: str | None = Field(None, description="codigo Python colado no site")
+    codigo: str | None = Field(
+        None, description="codigo colado no site; a linguagem vem da extensao de `nome`"
+    )
     nome: str = Field(NOME_DO_CODIGO_COLADO, description="nome exibido para o codigo colado")
     arquivos: list[ArquivoEnviado] = Field(default_factory=list)
 
@@ -62,7 +65,10 @@ class Envio(BaseModel):
 app = FastAPI(
     title="OWASP-Scan",
     version=VERSAO,
-    description="Analise estatica (AST + taint tracking) de codigo Python contra o OWASP Top 10:2021.",
+    description=(
+        "Analise estatica (AST + taint tracking) de Python, JavaScript/TypeScript, "
+        "Java, PHP e HTML contra o OWASP Top 10:2021."
+    ),
 )
 app.add_middleware(
     CORSMiddleware,
@@ -82,11 +88,12 @@ def nome_seguro(nome: str | None) -> str:
     base = PureWindowsPath(PurePosixPath(nome or "").name).name
     if base in {"", ".", ".."}:
         raise HTTPException(400, f"nome de arquivo invalido: {nome!r}")
-    if not base.endswith(".py") and formato_de(Path(base)) is None:
+    if not base.endswith(".py") and formato_de(Path(base)) is None and linguagem_de(base) is None:
         raise HTTPException(
             400,
             f"tipo de arquivo nao suportado: {base!r} "
-            "(aceitos: .py e configuracao .env/.yaml/.json/.ini/.toml/.properties)",
+            "(aceitos: .py, .js/.ts/.jsx/.tsx, .java, .php, .html e configuracao "
+            ".env/.yaml/.json/.ini/.toml/.properties)",
         )
     return base
 

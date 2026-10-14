@@ -8,7 +8,8 @@ export const traducoes = {
     btn_scan: "Analisar",
     btn_search: "Pesquisar",
     url_placeholder: "Pesquisar ou analisar um URL",
-    snippet_placeholder: "# Cole o seu código-fonte aqui...",
+    snippet_placeholder: "Cole o seu código-fonte aqui...",
+    snippet_language: "Linguagem do código",
     cli_title: "Automatize as suas análises",
     cli_desc: "Integre o AEGIS diretamente na sua pipeline CI/CD ou terminal usando a nossa ferramenta de linha de comandos (CLI).",
     // Avisos Legais
@@ -30,7 +31,7 @@ export const traducoes = {
     // Resultado da análise
     analyzing: "A analisar...",
     res_title: "Resultado da análise",
-    res_files: "Ficheiros Python",
+    res_files: "Ficheiros analisados",
     res_config: "Ficheiros de configuração",
     res_failed: "Ficheiros com falha",
     res_total: "Achados",
@@ -42,7 +43,7 @@ export const traducoes = {
     res_fix: "Recomendação:",
     sev: { alta: "Alta", media: "Média", baixa: "Baixa" },
     err_no_connection: "Não foi possível ligar à API. Verifique se o backend está a correr (python -m owaspscan.api).",
-    err_url: "Não foi possível descarregar o ficheiro deste URL. Use um link direto (raw) para um ficheiro .py.",
+    err_url: "Não foi possível descarregar o ficheiro deste URL. Use um link direto (raw) para o ficheiro de código.",
     err_empty: "Nada para analisar.",
     err_prefix: "Erro na análise:"
   },
@@ -55,7 +56,8 @@ export const traducoes = {
     btn_scan: "Scan",
     btn_search: "Search",
     url_placeholder: "Search or scan a URL",
-    snippet_placeholder: "# Paste your source code here...",
+    snippet_placeholder: "Paste your source code here...",
+    snippet_language: "Code language",
     cli_title: "Automate your scans",
     cli_desc: "Integrate AEGIS directly into your CI/CD pipeline or terminal using our command-line tool (CLI).",
     // Legal Warnings
@@ -77,7 +79,7 @@ export const traducoes = {
     // Scan result
     analyzing: "Scanning...",
     res_title: "Scan result",
-    res_files: "Python files",
+    res_files: "Analyzed files",
     res_config: "Configuration files",
     res_failed: "Files with errors",
     res_total: "Findings",
@@ -89,7 +91,7 @@ export const traducoes = {
     res_fix: "Recommendation:",
     sev: { alta: "High", media: "Medium", baixa: "Low" },
     err_no_connection: "Could not reach the API. Check that the backend is running (python -m owaspscan.api).",
-    err_url: "Could not download the file from this URL. Use a direct (raw) link to a .py file.",
+    err_url: "Could not download the file from this URL. Use a direct (raw) link to the source file.",
     err_empty: "Nothing to scan.",
     err_prefix: "Scan error:"
   }

@@ -30,7 +30,8 @@ def montar_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="owasp-scan",
         description=(
-            "Analisa codigo Python (Flask/Django) e arquivos de configuracao em "
+            "Analisa codigo Python (Flask/Django), JavaScript/TypeScript, Java, PHP, "
+            "HTML e arquivos de configuracao em "
             "busca de vulnerabilidades do OWASP Top 10:2021 — injecao (SQLi, "
             "XSS), controle de acesso (IDOR, path traversal, open redirect, "
             "CSRF, rota sem autorizacao), XXE, falhas de autenticacao e "
@@ -38,7 +39,8 @@ def montar_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "caminho", help="arquivo .py, arquivo de configuracao ou diretorio a analisar"
+        "caminho",
+        help="arquivo (.py, .js, .ts, .java, .php, .html, configuracao) ou diretorio a analisar",
     )
     parser.add_argument(
         "--json",

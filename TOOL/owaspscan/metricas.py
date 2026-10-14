@@ -1,7 +1,8 @@
 """Avaliacao da ferramenta contra um corpus rotulado.
 
-O gabarito mora nas proprias amostras (.py e arquivos de configuracao com
-comentario `#`), como comentario na linha do sink:
+O gabarito mora nas proprias amostras (.py, arquivos de configuracao e
+codigo de outras linguagens), como comentario na linha do sink — `#`,
+`//` ou `<!-- -->`, conforme a linguagem:
 
     cursor.execute("SELECT ... " + ident)   # achado: CWE-89, CWE-639
     cursor.execute(consulta)                # limitacao: CWE-89 fluxo interprocedural
@@ -23,10 +24,14 @@ from pathlib import Path
 
 from owaspscan.achado import MAPA_CWE_OWASP
 from owaspscan.configuracao import descobrir_configuracoes
+from owaspscan.poliglota.fonte import descobrir_arquivos_poliglotas
 from owaspscan.varredura import Varredura, executar
 
-_MARCA_ACHADO = re.compile(r"#\s*achado:\s*([A-Za-z0-9\-,\s]+)")
-_MARCA_LIMITACAO = re.compile(r"#\s*limitacao:\s*(CWE-\d+)\s*(.*)")
+_COMENTARIO = r"(?:#|//|<!--)"
+_MARCA_ACHADO = re.compile(_COMENTARIO + r"\s*achado:\s*([A-Za-z0-9\-,\s]+)")
+_MARCA_LIMITACAO = re.compile(
+    _COMENTARIO + r"\s*limitacao:\s*(CWE-\d+)\s*(.*?)\s*(?:-->)?$"
+)
 
 
 @dataclass(frozen=True)
@@ -47,21 +52,26 @@ def _cwes_marcadas(texto: str) -> list[str]:
     casamento = _MARCA_ACHADO.search(texto)
     if not casamento:
         return []
+    # findall em vez de split: o "-->" do HTML nao pode grudar na ultima CWE.
     return [
-        parte.strip()
-        for parte in casamento.group(1).split(",")
-        if parte.strip() in MAPA_CWE_OWASP
+        cwe for cwe in re.findall(r"CWE-\d+", casamento.group(1)) if cwe in MAPA_CWE_OWASP
     ]
 
 
 def carregar_gabarito(raiz: Path | str) -> list[ItemDeGabarito]:
-    """Le os marcadores de gabarito de todos os .py sob a raiz."""
+    """Le os marcadores de gabarito de todos os arquivos analisaveis sob a raiz."""
     raiz = Path(raiz)
     base = raiz if raiz.is_dir() else raiz.parent
     if raiz.is_file():
         arquivos = [raiz]
     else:
-        arquivos = sorted({*raiz.rglob("*.py"), *descobrir_configuracoes(raiz)})
+        arquivos = sorted(
+            {
+                *raiz.rglob("*.py"),
+                *descobrir_configuracoes(raiz),
+                *descobrir_arquivos_poliglotas(raiz),
+            }
+        )
 
     itens: list[ItemDeGabarito] = []
     for caminho in arquivos:

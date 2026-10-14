@@ -32,7 +32,26 @@ Por isso "hash fraco de senha", tema de autenticacao, aparece em A02.
 ## Ambiente
 
     python3 -m venv .venv
-    .venv/bin/python -m pip install -e ".[dev]"
+    .venv/bin/python -m pip install -e ".[dev,linguagens]"
+
+## Outras linguagens
+
+Alem de Python, a ferramenta analisa JavaScript/TypeScript (Node/Express,
+Koa, DOM, React). Como a stdlib so tem parser de Python, essas linguagens usam
+o tree-sitter, instalado pelo extra opcional `[linguagens]`; sem ele, o nucleo
+continua funcionando e os arquivos dessas linguagens aparecem no relatorio como
+falha de leitura com motivo `dependencia`.
+
+A deteccao segue o mesmo principio do nucleo: AST (arvore do tree-sitter) e
+taint tracking intraprocedural, nunca regex. Cada linguagem e um perfil em
+`owaspscan/poliglota/` com fontes, sinks e sanitizadores.
+
+| Linguagem | Extensoes | CWEs |
+| --- | --- | --- |
+| JavaScript / TypeScript | .js .mjs .cjs .jsx .ts .tsx | 89, 79, 22, 601, 798 |
+
+Arquivos gerados (`.min.js`, `.bundle.js`, `.d.ts`), `node_modules` e
+arquivos acima de 1 MB ficam de fora.
 
 ## Uso
 

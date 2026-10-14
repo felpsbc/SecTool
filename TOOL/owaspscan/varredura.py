@@ -36,6 +36,7 @@ from owaspscan.detectores.xss import DetectorXss
 from owaspscan.detectores.xxe import DetectorXxe
 from owaspscan.motor.catalogo import CATALOGO_PADRAO, Catalogo
 from owaspscan.motor.taint import analisar_taint
+from owaspscan.poliglota.fonte import analisar_diretorio_poliglota
 
 VERSAO = "0.2.0"
 CONFIANCA_DE_CANDIDATO = "baixa"
@@ -70,6 +71,8 @@ class Varredura:
     achados: tuple[Achado, ...] = ()
     arquivos_analisados: int = 0
     arquivos_de_configuracao: int = 0
+    # linguagem -> quantidade de arquivos analisados (inclui "python")
+    arquivos_por_linguagem: dict[str, int] = field(default_factory=dict)
     falhas: tuple[FalhaDeLeitura, ...] = ()
     momento: datetime = field(default_factory=datetime.now)
     versao: str = VERSAO
@@ -98,7 +101,8 @@ def executar(
 ) -> Varredura:
     """Analisa a raiz (arquivo ou diretorio) com todos os detectores.
 
-    Alem do codigo Python, le arquivos de configuracao (.env, YAML, JSON,
+    Alem do codigo Python, analisa JavaScript/TypeScript, Java, PHP e HTML
+    (quando o extra `[linguagens]` esta instalado) e le arquivos de configuracao (.env, YAML, JSON,
     INI, TOML, .properties) em busca de credenciais fixas, a menos que
     `incluir_configuracao` seja False.
     """
@@ -112,6 +116,16 @@ def executar(
         for detector in ativos:
             achados.extend(detector.detectar(arquivo, escopos))
 
+    por_linguagem: dict[str, int] = {"python": len(analisados)} if analisados else {}
+    poliglotas, falhas_poliglotas = analisar_diretorio_poliglota(caminho)
+    falhas = [*falhas, *falhas_poliglotas]
+    if poliglotas:
+        from owaspscan.poliglota.registro import detectar_poliglota
+
+        for arquivo in poliglotas:
+            achados.extend(detectar_poliglota(arquivo))
+            por_linguagem[arquivo.linguagem] = por_linguagem.get(arquivo.linguagem, 0) + 1
+
     configuracoes = []
     if incluir_configuracao:
         configuracoes, falhas_de_configuracao = ler_diretorio(caminho)
@@ -123,7 +137,8 @@ def executar(
     return Varredura(
         raiz=str(raiz),
         achados=tuple(ordenar_achados(achados)),
-        arquivos_analisados=len(analisados),
+        arquivos_analisados=len(analisados) + len(poliglotas),
+        arquivos_por_linguagem=por_linguagem,
         arquivos_de_configuracao=len(configuracoes),
         falhas=tuple(falhas),
         momento=momento or datetime.now(),

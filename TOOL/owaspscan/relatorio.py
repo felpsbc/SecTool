@@ -114,6 +114,12 @@ def formatar_texto(varredura: Varredura) -> str:
         f" Arquivos       : {varredura.arquivos_analisados} analisados, "
         f"{varredura.arquivos_de_configuracao} de configuracao, "
         f"{len(varredura.falhas)} com falha de leitura",
+    ]
+    if set(varredura.arquivos_por_linguagem) - {"python"}:
+        linhas += [
+            f" Linguagens     : {_linha_de_contagem(varredura.arquivos_por_linguagem)}"
+        ]
+    linhas += [
         f" Achados        : {resumo.total} "
         f"({resumo.confirmados} rastreados por taint, "
         f"{resumo.candidatos} candidatos heuristicos) "
@@ -179,6 +185,7 @@ def para_dict(varredura: Varredura) -> dict[str, object]:
         "varredura": {
             "arquivos_analisados": varredura.arquivos_analisados,
             "arquivos_de_configuracao": varredura.arquivos_de_configuracao,
+            "arquivos_por_linguagem": varredura.arquivos_por_linguagem,
             "arquivos_com_falha": len(varredura.falhas),
             "falhas": [
                 {

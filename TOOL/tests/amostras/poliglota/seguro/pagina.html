@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <form method="POST" action="/transferir">
+    <input type="hidden" name="csrf_token" value="{{ token }}">
+    <input name="valor">
+  </form>
+  <form method="post" action="/perfil">
+    {% csrf_token %}
+    <input name="nome">
+  </form>
+  <script type="application/json">{"password": "nao-e-codigo"}</script>
+  <script>
+    document.getElementById("saida").textContent = location.hash;
+    const chave = window.CONFIG.apiKey;
+  </script>
+</body>
+</html>

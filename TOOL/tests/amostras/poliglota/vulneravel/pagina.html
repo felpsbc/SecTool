@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="/static/app.js"></script>
+  <script type="text/template"><p>{{ nome }}</p></script>
+</head>
+<body>
+  <form method="post" action="/transferir"> <!-- achado: CWE-352 -->
+    <input name="valor">
+    <button>Enviar</button>
+  </form>
+
+  <form method="get" action="/busca"><input name="q"></form>
+
+  <a href="#" onclick="document.getElementById('x').innerHTML = location.hash">ver</a> <!-- achado: CWE-79 -->
+
+  <script>
+    const MAPS_API_KEY = "AIzaSyExemploDeChave123"; // achado: CWE-798
+    const destino = new URLSearchParams(location.search).get("ir");
+    if (destino) {
+      window.location = destino; // achado: CWE-601
+    }
+    document.write("<h2>" + document.referrer + "</h2>"); // achado: CWE-79
+  </script>
+</body>
+</html>

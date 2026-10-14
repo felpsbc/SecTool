@@ -36,9 +36,14 @@ Por isso "hash fraco de senha", tema de autenticacao, aparece em A02.
 
 ## Uso
 
-    python -m owaspscan caminho/do/projeto
-    python -m owaspscan app.py --json | jq '.resumo'
-    python -m owaspscan .env          # arquivo de configuracao isolado
+Com o venv ativo (`source .venv/bin/activate`), o `pip install -e .` instala
+o comando `owasp-scan`:
+
+    owasp-scan caminho/do/projeto
+    owasp-scan app.py --json | jq '.resumo'
+    owasp-scan .env                   # arquivo de configuracao isolado
+
+`python -m owaspscan ...` continua funcionando.
 
 Codigos de saida: `0` sem achado de severidade alta, `1` com achado alto,
 `2` erro de uso. Candidatos heuristicos (confianca baixa) nao alteram o

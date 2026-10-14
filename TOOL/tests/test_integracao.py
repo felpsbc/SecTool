@@ -162,3 +162,23 @@ class TestExecucaoComoModulo:
         assert processo.returncode == CODIGO_OK
         dados = json.loads(processo.stdout)
         assert dados["resumo"]["total"] == len(dados["achados"])
+
+
+class TestComandoCurto:
+    """Fase 21: `owasp-scan` instalado como comando, sem `python -m`."""
+
+    def test_entry_point_aponta_para_a_cli(self):
+        from importlib.metadata import entry_points
+
+        (comando,) = entry_points(group="console_scripts", name="owasp-scan")
+        assert comando.value == "owaspscan.cli:main"
+
+    def test_comando_instalado_roda_e_devolve_codigo_de_saida(self):
+        executavel = Path(sys.executable).parent / "owasp-scan"
+        if not executavel.exists():
+            pytest.skip("pacote nao instalado com pip install -e .")
+        resultado = subprocess.run(
+            [str(executavel), str(VULNERAVEL)], capture_output=True, text=True
+        )
+        assert resultado.returncode == CODIGO_ACHADO_ALTO
+        assert "resumo executivo" in resultado.stdout

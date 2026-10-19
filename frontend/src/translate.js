@@ -1,29 +1,31 @@
 export const traducoes = {
   pt: {
-    subtitle: "Analise ficheiros suspeitos, domínios, IPs e URLs para detetar malware e outras vulnerabilidades, partilhando-os automaticamente com a comunidade de segurança.",
+    subtitle: "Analise código, ficheiros e URLs para detetar vulnerabilidades de segurança.",
     tab_file: "FICHEIRO",
     tab_url: "URL",
     tab_snippet: "CÓDIGO",
     btn_choose: "Escolher ficheiro",
     btn_scan: "Analisar",
+    btn_scanning: "Analisando...",
     btn_search: "Pesquisar",
+
     url_placeholder: "Pesquisar ou analisar um URL",
     snippet_placeholder: "Cole o seu código-fonte aqui...",
     snippet_language: "Linguagem do código",
+
+    btn_github: "Ver no GitHub",
+    url_placeholder: "Pesquisar ou analisar um URL (ex: https://site.com)",
+    snippet_placeholder: "# Cole o seu código-fonte aqui para análise estática em tempo real...",
+    disclaimer_text: "Processamento seguro (Client-Side): Os seus ficheiros e códigos nunca saem do seu navegador.\nO processamento é 100% local.",
+    false_positive_warning: "Aviso: Sendo um scanner Web ultrarrápido baseado em RegEx, podem ocorrer falsos positivos.\nPara auditorias exatas com Árvore de Sintaxe Abstrata (AST), utilize a CLI.",
+
     cli_title: "Automatize as suas análises",
-    cli_desc: "Integre o AEGIS diretamente na sua pipeline CI/CD ou terminal usando a nossa ferramenta de linha de comandos (CLI).",
-    // Avisos Legais
-    disclaimer_text: "Ao submeter dados acima, concorda com os nossos Termos de Serviço e Aviso de Privacidade, e com a partilha da sua submissão com a comunidade de segurança. Por favor, não submeta informações pessoais; não somos responsáveis pelo conteúdo da sua submissão.",
-    learn_more: "Saiba mais.",
-    // Rodapé
+    cli_desc: "Integre o AEGIS diretamente na sua pipeline CI/CD ou terminal usando a nossa ferramenta de linha de comandos.",
+    
+    // Footer & Pages Titles
     ft_prod: "O nosso produto",
     ft_resources: "Recursos",
     ft_docs: "Documentação",
-    ft_scanner: "AEGIS Scanner",
-    ft_cli: "AEGIS CLI",
-    ft_how_to: "Como usar",
-    ft_faq: "Perguntas Frequentes",
-    ft_scripts: "Scripts de API",
     ft_docs_official: "Documentação Oficial",
     ft_terms: "Termos de Uso",
     ft_privacy: "Privacidade",
@@ -48,30 +50,24 @@ export const traducoes = {
     err_prefix: "Erro na análise:"
   },
   en: {
-    subtitle: "Analyse suspicious files, domains, IPs and URLs to detect malware and other breaches, automatically share them with the security community.",
+    subtitle: "Analyse code, files, and URLs to detect security vulnerabilities.",
     tab_file: "FILE",
     tab_url: "URL",
     tab_snippet: "SNIPPET",
     btn_choose: "Choose file",
     btn_scan: "Scan",
+    btn_scanning: "Scanning...",
     btn_search: "Search",
     url_placeholder: "Search or scan a URL",
     snippet_placeholder: "Paste your source code here...",
     snippet_language: "Code language",
     cli_title: "Automate your scans",
-    cli_desc: "Integrate AEGIS directly into your CI/CD pipeline or terminal using our command-line tool (CLI).",
-    // Legal Warnings
-    disclaimer_text: "By submitting data above, you are agreeing to our Terms of Service and Privacy Notice, and to the sharing of your Sample submission with the security community. Please do not submit any personal information; we are not responsible for the contents of your submission.",
-    learn_more: "Learn more.",
-    // Footer
+    cli_desc: "Integrate AEGIS directly into your CI/CD pipeline or terminal using our command-line tool.",
+    
+    // Footer & Pages Titles
     ft_prod: "Our product",
     ft_resources: "Resources",
     ft_docs: "Documentation",
-    ft_scanner: "AEGIS Scanner",
-    ft_cli: "AEGIS CLI",
-    ft_how_to: "How to use",
-    ft_faq: "FAQ",
-    ft_scripts: "API Scripts",
     ft_docs_official: "Official Documentation",
     ft_terms: "Terms of Use",
     ft_privacy: "Privacy",

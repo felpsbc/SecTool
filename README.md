@@ -2,6 +2,8 @@
 
 Ferramenta de análise estática de segurança (SAST) que atua como barreira entre código gerado por IA e o ambiente de produção: detecta vulnerabilidades do OWASP Top 10:2021 em código Python (Django/Flask) e em arquivos de configuração, **sem executar o código analisado** — apenas AST e taint tracking.
 
+Link de acesso: https://aegisscan-zeta.vercel.app/
+
 ## Identificação do repositório
 
 | Campo | Informação |

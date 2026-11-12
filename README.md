@@ -48,7 +48,9 @@ Repositório: <https://github.com/felpsbc/SecTool> · Site de demonstração: <h
 
 Todos os caminhos têm um passo **“validar a ferramenta”**: o AEGIS roda em códigos de exemplo com vulnerabilidades conhecidas e mostra quantas encontrou. É a forma mais rápida de confirmar que a ferramenta funciona antes de confiar nela para o seu projeto.
 
-No computador, tudo se resume a **um único arquivo**, o `aegis.py`: na primeira execução ele cria um ambiente isolado dentro da própria pasta do AEGIS (`TOOL/.venv`) e instala o que precisa; nada é instalado no resto do sistema.
+> **O que é o `aegis.py`?** É o atalho para usar o AEGIS no seu computador. Ele fica na **pasta principal** do repositório, ao lado deste `README.md` ([ver o arquivo](aegis.py)), e já vem junto quando você baixa o projeto — não é preciso criar nada.
+> Ao ser aberto, ele **pergunta qual pasta analisar** (é só arrastar a pasta para a janela). Na primeira vez, prepara sozinho um ambiente isolado dentro da própria pasta do AEGIS (`TOOL/.venv`); nada é instalado no resto do sistema.
+> Por dentro, ele apenas chama o motor do projeto (`TOOL/owaspscan`), o mesmo usado pela CLI `owasp-scan` e pelo notebook.
 
 ---
 
@@ -121,21 +123,25 @@ Confira com `dir`: o arquivo `aegis.py` deve aparecer na lista.
 
 > O ZIP às vezes extrai uma pasta dentro de outra com o mesmo nome (`SecTool-main\SecTool-main`). Entre até a que tem o `aegis.py`.
 
-### W4 — Validar que a ferramenta funciona
+### W4 — Analisar o seu projeto (jeito mais fácil)
+
+1. Na pasta do AEGIS, **dê dois cliques no arquivo `aegis.py`**. Se ele abrir num editor de texto em vez de rodar, clique com o botão direito → **Abrir com → Python**. Outra opção: no terminal do passo W3, digite `py aegis.py`.
+2. Abre uma janela preta. Na **primeira vez** leva cerca de 1 minuto e precisa de internet: o AEGIS prepara o ambiente dele (só dentro da própria pasta). Nas próximas vezes é instantâneo.
+3. Quando aparecer **"Arraste para esta janela a PASTA ou o ARQUIVO do seu projeto"**, arraste a pasta do seu projeto do Explorador de Arquivos para dentro da janela e aperte **Enter**.
+   - Quer só ver funcionando? Digite `exemplo` e aperte Enter.
+4. O resultado aparece na tela e fica salvo em **`relatorio_aegis.txt`**, na pasta do AEGIS. Arraste outra pasta para analisar de novo, ou aperte **Enter** para fechar.
+
+### W5 — Pelo terminal: validar a ferramenta e outras opções
+
+Para conferir que a ferramenta funciona, rode no terminal (passo W3):
 
 ```bat
 py aegis.py --testar
 ```
 
-Na **primeira vez** leva cerca de 1 minuto e precisa de internet (cria o ambiente e instala o AEGIS). Nas próximas, é instantâneo. Ao final aparece uma tabela comparando o que o AEGIS encontrou com o gabarito; a linha `geral` deve mostrar algo como **Precisão 1.00 / Recall 0.97** — nenhum alarme falso e quase todas as falhas plantadas encontradas.
+Ao final aparece uma tabela comparando o que o AEGIS encontrou com o gabarito dos códigos de exemplo; a linha `geral` deve mostrar algo como **Precisão 1.00 / Recall 0.97** — nenhum alarme falso e quase todas as falhas plantadas encontradas.
 
-Veja um relatório de verdade analisando o app propositalmente vulnerável que vem no repositório:
-
-```bat
-py aegis.py docs\teste\app_vulneravel.py
-```
-
-### W5 — Analisar o SEU projeto
+**Analisar o seu projeto por comando** (sem o modo guiado):
 
 ```bat
 py aegis.py C:\Users\seu-nome\projetos\minha-api
@@ -158,6 +164,9 @@ py aegis.py C:\projetos\minha-api --json --saida relatorio.json
 
 ```bat
 git clone https://github.com/felpsbc/SecTool.git && cd SecTool
+rem modo guiado: arraste a pasta e aperte Enter
+py aegis.py
+rem ou, por comando:
 py aegis.py --testar
 py aegis.py C:\caminho\do\projeto
 ```
@@ -211,21 +220,30 @@ ls                            # o arquivo aegis.py deve aparecer
 
 Atalho pela interface gráfica: clique com o botão direito dentro da pasta → **Abrir no terminal**.
 
-### L4 — Validar que a ferramenta funciona
+### L4 — Analisar o seu projeto (jeito mais fácil)
+
+1. No terminal aberto na pasta do AEGIS (passo L3), digite:
+
+   ```bash
+   python3 aegis.py
+   ```
+
+2. Na **primeira vez** leva cerca de 1 minuto e precisa de internet: o AEGIS prepara o ambiente dele (só dentro da própria pasta). Nas próximas vezes é instantâneo.
+3. Quando aparecer **"Arraste para esta janela a PASTA ou o ARQUIVO do seu projeto"**, arraste a pasta do projeto do gerenciador de arquivos para o terminal (ou digite o caminho) e aperte **Enter**.
+   - Quer só ver funcionando? Digite `exemplo` e aperte Enter.
+4. O resultado aparece na tela e fica salvo em **`relatorio_aegis.txt`**, na pasta do AEGIS. Arraste outra pasta para analisar de novo, ou aperte **Enter** para sair.
+
+### L5 — Pelo terminal: validar a ferramenta e outras opções
+
+Para conferir que a ferramenta funciona:
 
 ```bash
 python3 aegis.py --testar
 ```
 
-Na **primeira vez** leva cerca de 1 minuto e precisa de internet (cria o ambiente e instala o AEGIS). Nas próximas, é instantâneo. A linha `geral` da tabela final deve mostrar algo como **Precisão 1.00 / Recall 0.97**.
+Ao final aparece uma tabela comparando o que o AEGIS encontrou com o gabarito dos códigos de exemplo; a linha `geral` deve mostrar algo como **Precisão 1.00 / Recall 0.97** — nenhum alarme falso e quase todas as falhas plantadas encontradas.
 
-Veja um relatório de verdade:
-
-```bash
-python3 aegis.py docs/teste/app_vulneravel.py
-```
-
-### L5 — Analisar o SEU projeto
+**Analisar o seu projeto por comando** (sem o modo guiado):
 
 ```bash
 python3 aegis.py ~/projetos/minha-api
@@ -248,6 +266,7 @@ python3 aegis.py ~/projetos/minha-api --json > relatorio.json
 
 ```bash
 git clone https://github.com/felpsbc/SecTool.git && cd SecTool
+python3 aegis.py                    # modo guiado: arraste a pasta e aperte Enter
 python3 aegis.py --testar
 python3 aegis.py caminho/do/projeto
 ```
@@ -312,6 +331,8 @@ Os achados vêm em dois blocos:
 | `python` abre a Microsoft Store | Use `py` em vez de `python`. Ou desative em *Configurações → Aplicativos → Configurações avançadas de aplicativos → Aliases de execução de aplicativo* os itens “python.exe” e “python3.exe”. |
 | Erro de permissão / “Acesso negado” ao criar `TOOL\.venv` | Não deixe o AEGIS dentro de `C:\Program Files`. Mova a pasta para `Documentos` ou `Downloads`. |
 | Antivírus bloqueia ou demora na primeira execução | É a criação do ambiente Python. Aguarde ou libere a pasta do AEGIS no antivírus. |
+| Dois cliques no `aegis.py` abrem o Bloco de Notas/VS Code | Botão direito no `aegis.py` → **Abrir com → Python**, ou rode `py aegis.py` no terminal. |
+| A janela do `aegis.py` abre e fecha na hora | Rode `py aegis.py` no Prompt de Comando (passo W3) para ver a mensagem de erro. |
 | Acentos estranhos no relatório salvo | Use `--saida relatorio.txt` em vez de `> relatorio.txt`. |
 | `git` não é reconhecido | Use o Download ZIP ([W2](#w2--baixar-o-aegis)) ou instale com `winget install Git.Git`. |
 
@@ -335,6 +356,7 @@ Mais detalhes: [`docs/instalacao.md`](docs/instalacao.md).
 
 | Comando (Linux: `python3`, Windows: `py`) | O que faz |
 | --- | --- |
+| `aegis.py` (sem nada) | Modo guiado: pergunta a pasta, analisa e salva em `relatorio_aegis.txt` |
 | `aegis.py CAMINHO` | Analisa um arquivo ou pasta e mostra o relatório em texto |
 | `aegis.py CAMINHO --json` | JSON no stdout, resumo em texto no stderr |
 | `aegis.py CAMINHO [--json] --saida ARQUIVO` | Salva o relatório em ARQUIVO (UTF-8) |
@@ -484,7 +506,7 @@ Sem banco de dados, sem serviços externos, sem persistência. Detalhes: [`docs/
 ### Estrutura do projeto
 
 ```
-├── aegis.py               # atalho: prepara o ambiente e roda o AEGIS com um comando
+├── aegis.py               # atalho: modo guiado (arraste a pasta) ou comandos; prepara o ambiente sozinho
 ├── AEGIS.ipynb            # notebook para Google Colab / Jupyter
 ├── TOOL/                  # motor SAST "owaspscan" (produto principal)
 │   ├── owaspscan/         #   núcleo: achado, analisador, motor/, detectores/, poliglota/,

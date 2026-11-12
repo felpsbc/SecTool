@@ -40,7 +40,7 @@ Repositório: <https://github.com/felpsbc/SecTool> · Site de demonstração: <h
 
 | Seu caso | Siga | Precisa instalar? |
 | --- | --- | --- |
-| Quero testar rápido, sem mexer no meu computador | **[2. Google Colab](#2-no-navegador-sem-instalar-nada-google-colab)** | Nada (só uma conta Google) |
+| Quero colar meu código e ver o resultado, sem instalar nada | **[2. Google Colab](#2-no-navegador-sem-instalar-nada-google-colab)** | Nada (só uma conta Google) |
 | Uso **Windows** (10 ou 11) | **[3. Windows](#3-windows--passo-a-passo)** | Só o Python 3.11+ |
 | Uso **Linux** (Ubuntu, Debian, Mint, Fedora, Arch…) ou **macOS** | **[4. Linux](#4-linux-e-macos--passo-a-passo)** | Só o Python 3.11+ |
 | Quero integrar em pipeline, script ou outro sistema | **[7. Uso avançado](#7-uso-avançado)** | Python 3.11+ (e Node.js para o site) |
@@ -54,16 +54,20 @@ No computador, tudo se resume a **um único arquivo**, o `aegis.py`: na primeira
 
 ## 2. No navegador, sem instalar nada (Google Colab)
 
-Funciona em qualquer sistema (Windows, Linux, macOS, Chromebook). O arquivo [`AEGIS.ipynb`](AEGIS.ipynb) é um notebook pronto: instala o AEGIS numa máquina temporária do Google, valida a ferramenta e analisa o seu projeto.
+Funciona em qualquer sistema (Windows, Linux, macOS, Chromebook) e é o jeito **mais fácil**: você cola o seu código numa caixa e clica em **Analisar**.
 
-1. Clique no botão **Abrir no Colab** no topo desta página (ou abra <https://colab.research.google.com>, menu **Arquivo → Abrir notebook → GitHub**, e cole o endereço deste repositório).
-2. Faça login com sua conta Google, se pedido.
-3. Na seção **3. Analisar o seu projeto**, escolha a origem no formulário:
-   - `github` — cole o link do repositório do seu projeto (repositório **privado**? salve um token do GitHub no Colab em 🔑 **Secrets** com o nome `GITHUB_TOKEN`);
-   - `zip` — envie um `.zip` com o seu projeto (será aberto um botão de upload);
-   - `pasta_local` — caminho de uma pasta (por exemplo, do Google Drive montado).
-4. Menu **Ambiente de execução → Executar tudo** (ou `Ctrl+F9`). Aguarde ~1 minuto.
-5. Role até o final: você verá as métricas de validação, a tabela de achados, a explicação e a correção recomendada para cada achado e um botão para baixar o relatório em JSON.
+1. Clique no botão **Abrir no Colab** no topo desta página e faça login com sua conta Google.
+2. Clique no **▶** da primeira célula (*Clique aqui para abrir o AEGIS*). Se aparecer o aviso *"Este notebook não foi criado pelo Google"*, clique em **Executar assim mesmo**. Aguarde ~1 minuto.
+3. Aparece uma **caixa de texto**: cole o seu código, escolha a linguagem (Python, JavaScript, TypeScript, Java, PHP, HTML, `.env` ou YAML) e clique em **Analisar**.
+4. O resultado aparece logo abaixo, um cartão por problema: severidade, linha, trecho do código, **o problema** e **como corrigir**. Quer só ver funcionando? Clique em **Usar um exemplo vulnerável** e depois em **Analisar**.
+
+**Projeto inteiro** (vários arquivos): na célula *Analisar um projeto inteiro*, escolha no formulário à direita:
+
+- `github` — cole o link do repositório (privado? salve um token do GitHub em 🔑 **Secrets**, na barra lateral, com o nome `GITHUB_TOKEN`);
+- `zip` — aparece um botão para enviar o `.zip` do projeto;
+- `google_drive` — informe a pasta dentro do *Meu Drive* (ex.: `projetos/minha-api`).
+
+Depois clique no **▶** da célula. A célula seguinte baixa o relatório em JSON, e as **métricas** da ferramenta (precisão/recall no corpus rotulado) ficam no final do notebook, como etapa opcional.
 
 > O notebook também funciona em Jupyter/VS Code no seu computador: abra `AEGIS.ipynb` de dentro do repositório baixado e execute as células.
 
@@ -273,7 +277,7 @@ O relatório começa com um **resumo executivo** e depois lista cada achado assi
 | `>` | O trecho de código (segredos aparecem mascarados, ex. `"ch***"`). |
 | Texto final | Por que é perigoso. |
 
-**Como corrigir:** o final do relatório em texto traz a seção **RECOMENDACOES POR TIPO**, com a correção para cada tipo de falha encontrada. No JSON (`--json`), cada achado tem o campo `recomendacao`; no notebook, a célula *Como corrigir cada achado* mostra problema e correção lado a lado.
+**Como corrigir:** o final do relatório em texto traz a seção **RECOMENDACOES POR TIPO**, com a correção para cada tipo de falha encontrada. No JSON (`--json`), cada achado tem o campo `recomendacao`; no notebook, cada cartão de resultado mostra o problema e a correção juntos.
 
 Os achados vêm em dois blocos:
 

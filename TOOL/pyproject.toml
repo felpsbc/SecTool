@@ -3,6 +3,7 @@ name = "owaspscan"
 version = "0.2.0"
 description = "Analisador estatico de vulnerabilidades OWASP Top 10 em codigo Python"
 requires-python = ">=3.11"
+license = {text = "MIT"}
 dependencies = []
 
 [project.scripts]

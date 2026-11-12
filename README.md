@@ -33,6 +33,7 @@ Repositório: <https://github.com/felpsbc/SecTool> · Site de demonstração: <h
 7. [Uso avançado (CLI, JSON, API, site, CI/CD, testes)](#7-uso-avançado)
 8. [O que o AEGIS detecta](#8-o-que-o-aegis-detecta)
 9. [Sobre o projeto (problema, arquitetura, documentação)](#9-sobre-o-projeto)
+10. [Uso responsável e licença (MIT)](#uso-responsável)
 
 ---
 
@@ -544,6 +545,19 @@ Inventário arquivo a arquivo: [`docs/estrutura.md`](docs/estrutura.md).
 - **Segurança do repositório**: não commite credenciais reais ([`SECURITY.md`](SECURITY.md)); os segredos em `TOOL/tests/amostras/` são fictícios.
 - Encontrou um falso positivo ou uma falha que o AEGIS deixou passar? Abra uma issue com o trecho de código — isso alimenta o corpus de avaliação.
 
+## Uso responsável
+
+O AEGIS foi feito para **ajudar desenvolvedores a encontrar e corrigir falhas no próprio código**. Ao usá-lo, você concorda que:
+
+- deve analisar apenas código **seu** ou que você tenha **autorização** para analisar;
+- os resultados são **apoio à revisão**, não uma garantia de segurança: podem existir falsos positivos (principalmente nos *candidatos heurísticos*) e falhas que a ferramenta não detecta (veja a [seção 8](#8-o-que-o-aegis-detecta) e as limitações em [`TOOL/README.md`](TOOL/README.md));
+- o AEGIS **não substitui** uma auditoria de segurança profissional nem testes de intrusão autorizados;
+- a responsabilidade pelo uso da ferramenta e pelas decisões tomadas com base nos relatórios é de **quem a utiliza**. Os autores não se responsabilizam por usos indevidos, ilegais ou sem autorização, nem por danos decorrentes do uso (ver a licença abaixo).
+
+Os exemplos vulneráveis do repositório (`docs/teste/`, `TOOL/tests/amostras/`) existem só para teste da ferramenta: **não os execute nem os publique** como aplicação real.
+
 ## Licença
 
-Veja [`LICENSE`](LICENSE).
+Distribuído sob a **licença MIT** — veja [`LICENSE`](LICENSE). Em resumo: você pode usar, copiar, modificar e distribuir o projeto, inclusive comercialmente, desde que mantenha o aviso de copyright e de licença. O software é fornecido **"no estado em que se encontra" (*as is*), sem garantias de qualquer tipo**, e os autores não respondem por reclamações, danos ou outras responsabilidades decorrentes do seu uso.
+
+Copyright (c) 2026 Felipe Barcelos de Carvalho, Lucas de Salles Almeida Moura, João Marcelo Guimarães Dourado, Marcos Vinícius Rocha.

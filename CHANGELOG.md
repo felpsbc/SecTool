@@ -2,6 +2,11 @@
 
 Registre aqui as mudanças relevantes por sprint ou marco avaliativo.
 
+## Licença e uso
+
+- Projeto passa a ser distribuído sob a licença MIT (`LICENSE`), substituindo o placeholder institucional.
+- README ganha a seção "Uso responsável" (análise só de código próprio ou autorizado; sem garantia; responsabilidade de quem usa).
+
 ## Motor owaspscan (TOOL/)
 
 - Protótipo inicial (Fases 0-9): contrato de achado, camada AST, motor de taint intraprocedural, detectores de SQLi/XSS/IDOR, relatório texto/JSON, CLI (`python -m owaspscan`) e avaliação contra corpus rotulado.

@@ -6,9 +6,11 @@ O AEGIS é uma ferramenta de análise estática de segurança (SAST): ele lê o 
 
 Analisa **Python (Flask/Django), JavaScript/TypeScript, Java, PHP, HTML** e arquivos de configuração (`.env`, YAML, JSON, INI, TOML, `.properties`).
 
-[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/CAMPUSCEUB/AEGIS/blob/main/AEGIS.ipynb)
+[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felpsbc/SecTool/blob/main/AEGIS.ipynb)
 
-Link de acesso: https://aegisscan-zeta.vercel.app/
+Repositório: <https://github.com/felpsbc/SecTool> · Site de demonstração: <https://aegisscan-zeta.vercel.app/>
+
+> **Sobre o site:** ele apresenta a interface do AEGIS e faz uma análise **simplificada** no próprio navegador; ele **não** usa o motor `owaspscan` nem a API (detalhes em [`docs/deploy.md`](docs/deploy.md#o-site-publicado-é-uma-demonstração-do-produto-não-um-cliente-da-api)). Para o resultado completo — o que este README ensina — use o **Colab** ou o **`aegis.py`**.
 
 ## Identificação do repositório
 
@@ -42,6 +44,7 @@ Link de acesso: https://aegisscan-zeta.vercel.app/
 | Uso **Windows** (10 ou 11) | **[3. Windows](#3-windows--passo-a-passo)** | Só o Python 3.11+ |
 | Uso **Linux** (Ubuntu, Debian, Mint, Fedora, Arch…) ou **macOS** | **[4. Linux](#4-linux-e-macos--passo-a-passo)** | Só o Python 3.11+ |
 | Quero integrar em pipeline, script ou outro sistema | **[7. Uso avançado](#7-uso-avançado)** | Python 3.11+ (e Node.js para o site) |
+| Só quero conhecer a interface | [Site de demonstração](https://aegisscan-zeta.vercel.app/) (análise simplificada, não é o motor completo) | Nada |
 
 Todos os caminhos têm um passo **“validar a ferramenta”**: o AEGIS roda em códigos de exemplo com vulnerabilidades conhecidas e mostra quantas encontrou. É a forma mais rápida de confirmar que a ferramenta funciona antes de confiar nela para o seu projeto.
 
@@ -55,13 +58,12 @@ Funciona em qualquer sistema (Windows, Linux, macOS, Chromebook). O arquivo [`AE
 
 1. Clique no botão **Abrir no Colab** no topo desta página (ou abra <https://colab.research.google.com>, menu **Arquivo → Abrir notebook → GitHub**, e cole o endereço deste repositório).
 2. Faça login com sua conta Google, se pedido.
-3. **Se o repositório do AEGIS for privado**: crie um token em <https://github.com/settings/tokens> (permissão de leitura de repositórios), clique no ícone de chave 🔑 (**Secrets**) na barra lateral esquerda do Colab, adicione um secret chamado `GITHUB_TOKEN` com o token e ative o acesso do notebook. Se o repositório for público, pule este passo.
-4. Na seção **3. Analisar o seu projeto**, escolha a origem no formulário:
-   - `github` — cole o link do repositório do seu projeto;
+3. Na seção **3. Analisar o seu projeto**, escolha a origem no formulário:
+   - `github` — cole o link do repositório do seu projeto (repositório **privado**? salve um token do GitHub no Colab em 🔑 **Secrets** com o nome `GITHUB_TOKEN`);
    - `zip` — envie um `.zip` com o seu projeto (será aberto um botão de upload);
    - `pasta_local` — caminho de uma pasta (por exemplo, do Google Drive montado).
-5. Menu **Ambiente de execução → Executar tudo** (ou `Ctrl+F9`). Aguarde ~1 minuto.
-6. Role até o final: você verá as métricas de validação, a tabela de achados, a explicação e a correção recomendada para cada achado e um botão para baixar o relatório em JSON.
+4. Menu **Ambiente de execução → Executar tudo** (ou `Ctrl+F9`). Aguarde ~1 minuto.
+5. Role até o final: você verá as métricas de validação, a tabela de achados, a explicação e a correção recomendada para cada achado e um botão para baixar o relatório em JSON.
 
 > O notebook também funciona em Jupyter/VS Code no seu computador: abra `AEGIS.ipynb` de dentro do repositório baixado e execute as células.
 
@@ -92,12 +94,12 @@ Para Windows 10 e 11. Os comandos usam o **Prompt de Comando** (`cmd`); no Power
 
 Escolha **uma** das formas:
 
-- **Sem Git (mais simples):** nesta página do GitHub, clique no botão verde **`<> Code` → Download ZIP**. Abra a pasta *Downloads*, clique com o botão direito no ZIP → **Extrair tudo…** → *Extrair*. Você terá uma pasta `AEGIS-main`.
+- **Sem Git (mais simples):** nesta página do GitHub, clique no botão verde **`<> Code` → Download ZIP**. Abra a pasta *Downloads*, clique com o botão direito no ZIP → **Extrair tudo…** → *Extrair*. Você terá uma pasta `SecTool-main`.
 - **Com Git** (instale com `winget install Git.Git` se não tiver):
 
   ```bat
   cd %USERPROFILE%\Documents
-  git clone https://github.com/CAMPUSCEUB/AEGIS.git
+  git clone https://github.com/felpsbc/SecTool.git
   ```
 
 ### W3 — Abrir o terminal na pasta do AEGIS
@@ -108,12 +110,12 @@ A pasta certa é a que contém o arquivo `aegis.py`.
 - **Pelo terminal:** `cd` + caminho da pasta, por exemplo:
 
   ```bat
-  cd %USERPROFILE%\Downloads\AEGIS-main\AEGIS-main
+  cd %USERPROFILE%\Downloads\SecTool-main\SecTool-main
   ```
 
 Confira com `dir`: o arquivo `aegis.py` deve aparecer na lista.
 
-> O ZIP às vezes extrai uma pasta dentro de outra com o mesmo nome (`AEGIS-main\AEGIS-main`). Entre até a que tem o `aegis.py`.
+> O ZIP às vezes extrai uma pasta dentro de outra com o mesmo nome (`SecTool-main\SecTool-main`). Entre até a que tem o `aegis.py`.
 
 ### W4 — Validar que a ferramenta funciona
 
@@ -151,7 +153,7 @@ py aegis.py C:\projetos\minha-api --json --saida relatorio.json
 **Resumo para Windows (quem já sabe o caminho):**
 
 ```bat
-git clone https://github.com/CAMPUSCEUB/AEGIS.git && cd AEGIS
+git clone https://github.com/felpsbc/SecTool.git && cd SecTool
 py aegis.py --testar
 py aegis.py C:\caminho\do\projeto
 ```
@@ -186,20 +188,20 @@ Se aparecer `Python 3.11` ou maior, ainda instale o pacote de ambientes virtuais
 
 ```bash
 cd ~
-git clone https://github.com/CAMPUSCEUB/AEGIS.git
+git clone https://github.com/felpsbc/SecTool.git
 ```
 
 **Sem Git:** no GitHub, clique em **`<> Code` → Download ZIP** e extraia:
 
 ```bash
 cd ~/Downloads
-unzip AEGIS-main.zip          # se faltar: sudo apt install unzip
+unzip SecTool-main.zip          # se faltar: sudo apt install unzip
 ```
 
 ### L3 — Entrar na pasta do AEGIS
 
 ```bash
-cd ~/AEGIS                    # ou: cd ~/Downloads/AEGIS-main
+cd ~/SecTool                  # ou: cd ~/Downloads/SecTool-main
 ls                            # o arquivo aegis.py deve aparecer
 ```
 
@@ -241,7 +243,7 @@ python3 aegis.py ~/projetos/minha-api --json > relatorio.json
 **Resumo para Linux/macOS (quem já sabe o caminho):**
 
 ```bash
-git clone https://github.com/CAMPUSCEUB/AEGIS.git && cd AEGIS
+git clone https://github.com/felpsbc/SecTool.git && cd SecTool
 python3 aegis.py --testar
 python3 aegis.py caminho/do/projeto
 ```
@@ -296,7 +298,7 @@ Os achados vêm em dois blocos:
 | `extras nao instalados (sem internet?)` | Python e configuração funcionam mesmo assim. Para JS/TS, Java, PHP e HTML: conecte-se à internet, apague a pasta `TOOL/.venv` e rode de novo. |
 | Arquivos aparecem em “falha de leitura” | Arquivo com erro de sintaxe ou linguagem sem suporte instalado; o restante é analisado normalmente. |
 | Quero reinstalar do zero | Apague a pasta `TOOL/.venv` — ela é recriada na próxima execução. |
-| Colab: `Nao consegui clonar o AEGIS` | O repositório é privado: configure o secret `GITHUB_TOKEN` ([seção 2, item 3](#2-no-navegador-sem-instalar-nada-google-colab)). |
+| Colab: `Falha ao clonar` o seu projeto | Confira o link. Se o seu repositório for privado, salve um token no Colab em 🔑 **Secrets** com o nome `GITHUB_TOKEN`. |
 
 ### Windows
 
@@ -316,7 +318,7 @@ Os achados vêm em dois blocos:
 | `ensurepip is not available` / `No module named venv` | Falta o pacote de ambientes virtuais: `sudo apt install python3-venv` (ou `python3.12-venv`, conforme sua versão). Depois apague `TOOL/.venv` e rode de novo. |
 | `python3 --version` mostra 3.10 ou menor (Ubuntu 22.04) | Instale o 3.12 pelo PPA deadsnakes ([L1](#l1--instalar-o-python)) e use `python3.12 aegis.py …`. |
 | `python: command not found` | No Linux o comando é `python3`. |
-| `Permission denied` | Não rode com `sudo`. Se a pasta foi criada com `sudo`, corrija o dono: `sudo chown -R $USER: ~/AEGIS`. |
+| `Permission denied` | Não rode com `sudo`. Se a pasta foi criada com `sudo`, corrija o dono: `sudo chown -R $USER: ~/SecTool`. |
 | `externally-managed-environment` | Só acontece se você rodar `pip install` fora do `aegis.py`. O `aegis.py` instala dentro de `TOOL/.venv`, sem esse problema. |
 
 Mais detalhes: [`docs/instalacao.md`](docs/instalacao.md).
@@ -399,7 +401,7 @@ npm install
 npm run dev        # http://localhost:5173 — /api é repassado para :8000
 ```
 
-O frontend é um **protótipo de interface** e ainda não consome a API em todas as telas. Roteiro de teste do site: [`docs/teste/ROTEIRO_DE_TESTE.md`](docs/teste/ROTEIRO_DE_TESTE.md).
+O frontend é o mesmo do [site de demonstração](https://aegisscan-zeta.vercel.app/): a análise que ele mostra é feita no navegador e **não** chama a API — `frontend/src/api.js` existe, mas não está ligado ao `App.jsx`. Por isso o `docs/teste/ROTEIRO_DE_TESTE.md` não corresponde mais ao site. Estado atual e como reconectar o site à API: [`docs/deploy.md`](docs/deploy.md).
 
 ### CI/CD (bloquear merge com falha alta)
 
@@ -408,11 +410,9 @@ Exemplo de GitHub Actions no **seu** projeto (funciona em `ubuntu-latest` e `win
 ```yaml
 - uses: actions/setup-python@v5
   with: { python-version: "3.12" }
-- run: pip install "owaspscan[linguagens] @ git+https://github.com/CAMPUSCEUB/AEGIS.git#subdirectory=TOOL"
+- run: pip install "owaspscan[linguagens] @ git+https://github.com/felpsbc/SecTool.git#subdirectory=TOOL"
 - run: owasp-scan . --json > aegis.json   # exit 1 se houver achado de severidade alta
 ```
-
-(Se o repositório do AEGIS for privado, o passo de instalação precisa de um token com acesso de leitura.)
 
 ### Testes e métricas
 
@@ -457,7 +457,7 @@ Estudos indicam que 40–45% do código gerado por IA contém vulnerabilidades c
 | Outras linguagens | tree-sitter (extra opcional `[linguagens]`) |
 | API HTTP | FastAPI + Uvicorn (extra opcional `[api]`) |
 | Testes | pytest (+ httpx para a API) |
-| Frontend (`frontend/`) | React 19, Vite 8, Tailwind CSS 3 — protótipo |
+| Frontend (`frontend/`) | React 19, Vite 8, Tailwind CSS 3 — site de demonstração, publicado na Vercel ([`docs/deploy.md`](docs/deploy.md)) |
 | Notebook | [`AEGIS.ipynb`](AEGIS.ipynb) (Google Colab / Jupyter) |
 
 ### Arquitetura resumida
@@ -486,7 +486,7 @@ Sem banco de dados, sem serviços externos, sem persistência. Detalhes: [`docs/
 │   ├── owaspscan/         #   núcleo: achado, analisador, motor/, detectores/, poliglota/,
 │   │                      #   varredura, relatorio, cli, api, metricas, configuracao
 │   └── tests/             #   pytest + amostras/ (corpus rotulado)
-├── frontend/              # SPA React (protótipo visual)
+├── frontend/              # site de demonstração (React), publicado na Vercel
 ├── docs/                  # documentação técnica detalhada
 ├── sprints/ entregas/     # gestão da disciplina
 └── .github/               # templates de issue/PR

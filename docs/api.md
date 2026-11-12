@@ -12,7 +12,7 @@ Documentação completa da única API do projeto AEGIS: a camada HTTP do analisa
 | Documentação interativa | Swagger UI em `/docs`, ReDoc em `/redoc`, esquema em `/openapi.json` (rotas automáticas do FastAPI; `/openapi.json` é customizado para registrar o schema `ArquivoEnviado` — `api.py:203-215`) | padrão FastAPI + `test_api.py:193-197` |
 | Subir o servidor | `.venv/bin/python -m owaspscan.api` | `api.py:228-229`, `TOOL/README.md` |
 | Banco de dados | **nenhum** — nenhum endpoint acessa banco; uploads vivem numa pasta temporária destruída por requisição | `api.py:123-130` |
-| Autenticação | **nenhuma** — API aberta | ver [Autenticação e autorização](#autenticação-e-autorização) |
+| Autenticação | **nenhuma** — API aberta | ver [Autenticação](#autenticação) |
 
 ### Endpoints existentes (inventário completo)
 
@@ -317,7 +317,7 @@ analisar(request)                                   api.py:191
 3. **Sem timeout de análise** — código patologicamente complexo roda até terminar (ponto fixo do taint por escopo).
 4. **Sem fila/concorrência controlada** — cada requisição ocupa uma thread do pool padrão do Starlette.
 5. **Um único processo** — sem configuração de workers múltiplos (`uvicorn.run(app)` sem parâmetros de workers).
-6. **Frontend ainda não integrado** — a API foi construída "para o site" (Fases 18-19 do git), mas `frontend/` não a chama.
+6. **Site não integrado** — a API foi construída "para o site" (Fases 18-19 do git), mas o site publicado (`frontend/`) faz uma análise simplificada no navegador e não a chama. Como reconectar: `docs/deploy.md`, Apêndice D.
 
 ## Referências
 

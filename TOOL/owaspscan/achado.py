@@ -26,7 +26,7 @@ class ClasseVulnerabilidade:
     vulnerabilidade: str
 
 
-# Mapeamento fixo definido no CLAUDE.md. Nao estender sem atualizar o teste
+# Mapeamento fixo definido no PRINCIPIOS.md. Nao estender sem atualizar o teste
 # de contrato: e ele que impede classificacao inventada. Cada categoria foi
 # conferida contra a lista oficial "List of Mapped CWEs" do OWASP Top 10:2021.
 MAPA_CWE_OWASP: dict[str, ClasseVulnerabilidade] = {

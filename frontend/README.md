@@ -1,56 +1,40 @@
-# AEGIS - site
+# AEGIS — site de demonstração
 
-Interface web (React + Vite + Tailwind) do OWASP-Scan. As análises são feitas
-pela API em [`TOOL/owaspscan/api.py`](../TOOL/owaspscan/api.py) (`POST /analisar`).
+Interface web do AEGIS (React 19 + Vite 8 + Tailwind CSS 3), publicada em
+<https://aegisscan-zeta.vercel.app/>.
+
+> **Estado atual:** o site apresenta a interface do produto e faz uma análise
+> **simplificada no próprio navegador** (regras em `src/App.jsx`). Ele **não chama**
+> o motor `owaspscan` nem a API. Para o resultado completo use o notebook Colab ou o
+> `aegis.py` — veja o [`README.md`](../README.md) da raiz.
 
 ## Rodar em desenvolvimento
 
-1. Backend, em um terminal:
-
-   ```bash
-   cd TOOL
-   .venv/bin/python -m pip install -e ".[api]"
-   .venv/bin/python -m owaspscan.api        # http://127.0.0.1:8000
-   ```
-
-2. Site, em outro terminal (Node.js 20+):
-
-   ```bash
-   cd frontend
-   npm install
-   npm run dev                              # http://localhost:5173
-   ```
-
-O Vite repassa `/api/*` para `http://127.0.0.1:8000` (veja `vite.config.js`),
-então não precisa configurar CORS. Para apontar para outra API em
-desenvolvimento: `OWASPSCAN_API=http://host:porta npm run dev`.
-
-## Build de produção
+Requer **Node.js ^20.19.0 ou ≥22.12.0**.
 
 ```bash
-VITE_API_URL=https://endereco-da-api npm run build    # gera dist/
+cd frontend
+npm install
+npm run dev          # http://localhost:5173
 ```
 
-Sem `VITE_API_URL`, o site chama `/api`, então o servidor que entrega o `dist/`
-precisa repassar `/api` para a API. Se a API estiver em outra origem, libere o
-site nela com `OWASPSCAN_ORIGENS=https://endereco-do-site`. Veja `.env.example`.
-
-## Como cada aba usa a API
-
-| Aba | Chamada |
-|-----|---------|
-| FICHEIRO | `multipart/form-data`, um campo `arquivos` por arquivo |
-| CÓDIGO | JSON `{"codigo": "...", "nome": "codigo.py"}` |
-| URL | o **navegador** baixa o arquivo (links `github.com/.../blob/...` viram `raw`) e envia o texto como JSON. A API não busca URLs, para não abrir SSRF no servidor. |
-
-O código fica em `src/api.js` (chamadas) e `src/Resultado.jsx` (painel de resultado).
-
-## Testar
-
-Roteiro manual com arquivo vulnerável e resultado esperado:
-[`docs/teste/ROTEIRO_DE_TESTE.md`](../docs/teste/ROTEIRO_DE_TESTE.md).
+## Build e verificação
 
 ```bash
 npm run lint
-npm run build
+npm run build        # gera dist/ (o mesmo build que a Vercel publica)
 ```
+
+## Ligar o site à API (pronto, ainda não aplicado)
+
+O cliente da API já existe e está pronto, mas não está importado pelo `App.jsx`:
+
+| Arquivo | Papel |
+| --- | --- |
+| `src/api.js` | envia arquivos (multipart), código colado (JSON) ou URL para `POST /analisar` |
+| `src/Resultado.jsx` | painel de resultado no estilo da interface |
+| `vite.config.js` | em desenvolvimento, repassa `/api/*` para `http://127.0.0.1:8000` |
+| `.env.example` | `VITE_API_URL`, endereço da API em produção |
+
+Passo a passo para reconectar (código, Vercel e API): [`docs/deploy.md`](../docs/deploy.md), Apêndice D.
+Arquivos de exemplo para testar uploads: [`docs/teste/`](../docs/teste/README.md).

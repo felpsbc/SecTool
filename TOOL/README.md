@@ -118,7 +118,7 @@ nome repetido; `413` grande demais; `415` Content-Type errado; `422` JSON invali
 
 O site em `frontend/` ja consome esta API (proxy `/api` no Vite); veja
 [frontend/README.md](../frontend/README.md) e o roteiro de teste em
-[docs/teste/ROTEIRO_DE_TESTE.md](../docs/teste/ROTEIRO_DE_TESTE.md).
+[docs/teste/ROTEIRO_DE_DEMONSTRACAO.md](../docs/teste/ROTEIRO_DE_DEMONSTRACAO.md).
 
 ## Testes
 
@@ -257,10 +257,10 @@ marca vulnerabilidade real que sabemos nao encontrar. **Limitacao declarada
 conta como falso negativo**: declarar a falha nao a transforma em acerto, e
 por isso o recall de CWE-89 e menor que 1.
 
-Resultado atual sobre o corpus (25 arquivos Python e 9 de configuracao
-analisados, 1 com erro de sintaxe proposital, 16 CWEs): precisao 1.00,
-recall 0.98, F1 0.99 no geral; os dois falsos negativos sao as limitacoes
-interprocedurais declaradas (CWE-89 e CWE-22).
+Resultado atual sobre o corpus, com o extra `[linguagens]` instalado (38
+arquivos de codigo e 9 de configuracao analisados, 1 com erro de sintaxe
+proposital, 16 CWEs): precisao 1.00, recall 0.97, F1 0.98 no geral; os 5
+falsos negativos sao todos limitacoes declaradas no gabarito (`# limitacao:`).
 
 As amostras de `tests/amostras/seguro/` sao seguras para a CWE que nomeiam,
 nao para todas: quando um detector novo encontra outra CWE real numa amostra

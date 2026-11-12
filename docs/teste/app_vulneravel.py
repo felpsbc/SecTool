@@ -1,7 +1,7 @@
-"""App Flask propositalmente vulneravel, para testar o AEGIS pelo site.
+"""App Flask propositalmente vulneravel, para demonstrar e testar o AEGIS.
 
 NAO USE EM PRODUCAO. Cada rota tem um defeito conhecido, anotado no
-comentario; o resultado esperado da analise esta em ROTEIRO_DE_TESTE.md.
+comentario; o resultado esperado da analise esta em ROTEIRO_DE_DEMONSTRACAO.md.
 """
 
 import sqlite3

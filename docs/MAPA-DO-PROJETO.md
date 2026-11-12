@@ -1,17 +1,17 @@
 # Mapa do projeto
 
-Mapa rápido de localização para desenvolvedores: onde está cada parte do sistema, com caminhos reais. Detalhes de cada item estão nos documentos linkados. Nomes de arquivos seguem o padrão da pasta `docs/` (minúsculo — ver `docs/documentation-audit.md` B5).
+Mapa rápido de localização para desenvolvedores: onde está cada parte do sistema, com caminhos reais. Detalhes de cada item estão nos documentos linkados. Nomes de arquivos seguem o padrão da pasta `docs/` (minúsculo — ver `docs/historico/documentation-audit.md` B5).
 
 ```
 PROJETO
-├── Finalidade .............. SAST para código Python (Django/Flask): detecta 16 CWEs do
-│                             OWASP Top 10:2021 via AST + taint tracking, sem executar o
+├── Finalidade .............. SAST para Python, JS/TS, Java, PHP, HTML e configuração:
+│                             16 CWEs do OWASP Top 10:2021 via AST + taint tracking, sem executar o
 │                             código analisado. Barreira entre código gerado por IA e produção.
 │                             → README.md · TOOL/README.md · docs/arquitetura.md
 │
 ├── Arquitetura ............. Núcleo Python em camadas (contrato → AST → motor → detectores
 │                             → orquestração → saída → entradas) + API HTTP opcional +
-│                             frontend React (protótipo, não integrado).
+│                             site React de demonstração (não chama a API).
 │                             → docs/arquitetura.md (componentes e decisões)
 │                             → docs/fluxos.md (5 fluxos passo a passo)
 │                             → docs/estrutura.md (inventário arquivo a arquivo)
@@ -20,23 +20,25 @@ PROJETO
 │                             [api]) · pytest (extra [dev]) · React 19 · Vite 8 · Tailwind 3
 │                             → TOOL/pyproject.toml · frontend/package.json
 │
-└── Execução ................ CLI:   cd TOOL && .venv/bin/python -m owaspscan caminho/
+└── Execução ................ Iniciante: python aegis.py (modo guiado) · AEGIS.ipynb (Colab)
+                              CLI:   cd TOOL && .venv/bin/python -m owaspscan caminho/
                               API:   cd TOOL && .venv/bin/python -m owaspscan.api   (:8000)
                               Site:  cd frontend && npm run dev
                               Métricas: .venv/bin/python -m owaspscan.metricas tests/amostras
+                              → README.md (passo a passo Windows/Linux/Colab)
                               → docs/instalacao.md (setup completo + verificação)
 ```
 
 ## FRONTEND
 
 ```
-FRONTEND (protótipo visual — nenhuma chamada de rede ainda)
+FRONTEND (site de demonstração — publicado na Vercel, não chama a API)
 ├── Localização ............. frontend/
 ├── Componentes principais
 │   ├── frontend/index.html ............... shell HTML (favicon, #root, theme-color)
 │   ├── frontend/src/main.jsx ............. bootstrap React
 │   ├── frontend/src/App.jsx .............. UI inteira: navegação, tema, i18n, abas,
-│   │                                       drag&drop, páginas estáticas (382 linhas)
+│   │                                       drag&drop, páginas estáticas (486 linhas)
 │   ├── frontend/src/translate.js ......... dicionário pt/en
 │   ├── frontend/src/index.css ............ diretivas Tailwind
 │   └── build/lint: frontend/vite.config.js · tailwind.config.js · postcss.config.js
@@ -44,8 +46,9 @@ FRONTEND (protótipo visual — nenhuma chamada de rede ainda)
 └── Fluxo ................... usuário → index.html → main.jsx → App.jsx
                               (estado local: tema em localStorage['aegis-tema'], idioma,
                               aba ativa, arquivos em useState — nada é enviado)
-                              Integração futura prevista: fetch POST /analisar
-                              → TOOL/README.md §"API HTTP (para o site)" · docs/fluxos.md §Fluxo 5
+                              Análise simplificada no navegador (regras em App.jsx).
+                              Cliente da API pronto, não ligado: src/api.js · src/Resultado.jsx
+                              → docs/deploy.md (estado publicado + Apêndice D: ligar à API)
 ```
 
 ## BACKEND
@@ -130,8 +133,8 @@ CONFIGURAÇÃO
 
 ```
 TESTES
-├── Localização ............. TOOL/tests/ (19 arquivos, 356 funções de teste; coleta pytest
-│                             é maior — testes parametrizados). Frontend: SEM testes.
+├── Localização ............. TOOL/tests/ (24 arquivos, 434 funções de teste; 613 testes
+│                             coletados — há parametrizados). Frontend: SEM testes.
 ├── Execução ................ cd TOOL && .venv/bin/python -m pytest -v
 ├── Apoio ................... TOOL/tests/conftest.py (rodar_detector, linhas_esperadas)
 ├── Corpus/gabarito ......... TOOL/tests/amostras/ — vulneravel/ (11 .py + config/) ·
@@ -150,7 +153,8 @@ INFRAESTRUTURA
 │                             são fixtures de teste do detector de credenciais)
 ├── CI/CD ................... NÃO EXISTE (.github/workflows/ ausente; gate possível hoje =
 │                             exit code da CLI, TOOL/owaspscan/cli.py:24-26)
-├── Deploy .................. nenhum — execução 100% local (venv + npm)
+├── Deploy .................. site: Vercel (https://aegisscan-zeta.vercel.app/)
+│                             API: sem host público (proposta em docs/deploy.md)
 └── Logs/monitoramento ...... nenhum próprio; stdout/stderr + logs padrão do Uvicorn;
                               healthcheck = GET /saude
                                             → docs/seguranca.md · docs/instalacao.md
@@ -160,9 +164,9 @@ INFRAESTRUTURA
 
 ```
 DOCUMENTAÇÃO
-├── README.md ..................... porta de entrada do projeto
+├── README.md ..................... porta de entrada: uso (Colab/Windows/Linux) e docs
 ├── TOOL/README.md ................ doc técnica do motor (cobertura, limitações, avaliação)
-├── TOOL/CLAUDE.md ................ princípios de desenvolvimento (obrigatório ler)
+├── TOOL/PRINCIPIOS.md ............ princípios de desenvolvimento (obrigatório ler)
 ├── docs/arquitetura.md ........... componentes, fluxos, decisões, riscos
 ├── docs/estrutura.md ............. inventário de arquivos + grafo de dependências
 ├── docs/instalacao.md ............ setup do zero, verificação, problemas comuns
@@ -172,10 +176,13 @@ DOCUMENTAÇÃO
 ├── docs/fluxos.md ................ fluxos de negócio passo a passo
 ├── docs/seguranca.md ............. mecanismos de segurança (implementado/parcial/ausente)
 ├── docs/guia-desenvolvedor.md .... onboarding: bugs, novas features, testes
-├── docs/documentation-audit.md ... auditoria doc × código + nota pós-correção
+├── docs/deploy.md ................ publicação do site (Vercel) e da API
+├── docs/teste/ ................... exemplos vulneráveis + roteiro de demonstração
+├── docs/historico/ .............. auditoria da documentação (registro do processo)
 ├── docs/MAPA-DO-PROJETO.md ....... este documento
 ├── SECURITY.md ................... política de segredos/incidentes
 ├── CHANGELOG.md .................. histórico de mudanças
+├── LICENSE ....................... licença MIT
 └── Pendências .................... docs/requisitos.md (template) · docs/decisoes/ (sem ADRs)
                                     · docs/reunioes/ (template) · sprints/ · entregas/
 ```
@@ -184,7 +191,7 @@ DOCUMENTAÇÃO
 
 | Quero... | Ir para |
 | --- | --- |
-| Entender o produto em 30 min | `TOOL/CLAUDE.md` → `TOOL/README.md` → `docs/arquitetura.md` |
+| Entender o produto em 30 min | `TOOL/PRINCIPIOS.md` → `TOOL/README.md` → `docs/arquitetura.md` |
 | Instalar e rodar | `docs/instalacao.md` |
 | Investigar um bug | `docs/guia-desenvolvedor.md` §11 (tabela por sintoma) |
 | Criar um detector novo | `docs/guia-desenvolvedor.md` §12 → `TOOL/owaspscan/detectores/sqli.py` (modelo) |

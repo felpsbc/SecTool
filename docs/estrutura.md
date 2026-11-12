@@ -6,19 +6,20 @@ Inventário técnico do repositório AEGIS: organização de diretórios, papel 
 
 ```
 AEGIS/
-├── README.md                  # identificação, problema e solução (institucional)
+├── README.md                  # porta de entrada: uso (Colab, Windows, Linux), relatório, docs
+├── aegis.py                   # ★ atalho de uso: modo guiado (arrastar a pasta) ou comandos
+├── AEGIS.ipynb                # ★ notebook Google Colab: caixa para colar código e analisar
+├── LICENSE                    # licença MIT
 ├── SECURITY.md                # política de segredos e incidentes
-├── CHANGELOG.md               # histórico (parado na Sprint 00)
-├── CONTRIBUTING.md            # guia de contribuição (template)
-├── CODE_OF_CONDUCT.md         # código de conduta (template)
-├── LICENSE                    # placeholder institucional (sem licença efetiva)
-├── Artigo_Vulnerabilidades_Codigo_IA.pdf   # artigo acadêmico de referência
+├── CHANGELOG.md               # histórico de mudanças
+├── CONTRIBUTING.md            # guia de contribuição
+├── CODE_OF_CONDUCT.md         # código de conduta
 ├── .editorconfig / .markdownlint.json / .gitignore   # padrões globais
 │
 ├── TOOL/                      # ★ O PRODUTO: motor SAST "owaspscan" (Python)
 │   ├── README.md              # documentação técnica principal (cobertura, limitações, avaliação)
-│   ├── CLAUDE.md              # princípios de desenvolvimento inegociáveis
-│   ├── pyproject.toml         # pacote, extras [api]/[dev], config do pytest
+│   ├── PRINCIPIOS.md          # princípios de desenvolvimento inegociáveis
+│   ├── pyproject.toml         # pacote, extras [api]/[linguagens]/[dev], config do pytest
 │   ├── owaspscan/             # código-fonte (camadas: contrato→AST→motor→detectores→saída→entradas)
 │   │   ├── __init__.py        # API pública do pacote (exports + __version__)
 │   │   ├── achado.py          # contrato central de achado + mapa CWE→OWASP
@@ -26,7 +27,7 @@ AEGIS/
 │   │   ├── configuracao.py    # leitores de .env/YAML/JSON/INI/TOML/.properties
 │   │   ├── varredura.py       # orquestração do pipeline
 │   │   ├── relatorio.py       # formatação pura (texto/JSON)
-│   │   ├── cli.py             # entrada de linha de comando
+│   │   ├── cli.py             # entrada de linha de comando (owasp-scan)
 │   │   ├── api.py             # entrada HTTP (FastAPI, extra opcional)
 │   │   ├── metricas.py        # autoavaliação contra corpus rotulado
 │   │   ├── __main__.py        # python -m owaspscan
@@ -36,40 +37,47 @@ AEGIS/
 │   │   │   ├── estrutura.py   # consultas estruturais sobre a AST
 │   │   │   ├── credenciais.py # regras de reconhecimento de segredos (CWE-798)
 │   │   │   └── confianca.py   # calibração alta/média/baixa
-│   │   └── detectores/        # 10 detectores + base/comum, 16 CWEs
-│   │       ├── base.py        # Protocol Detector + ordenação
-│   │       ├── comum.py       # helpers de sink por argumento
-│   │       ├── sqli.py  xss.py  idor.py  xxe.py
-│   │       ├── path_traversal.py  open_redirect.py  csrf.py
-│   │       ├── autorizacao.py  autenticacao.py  credenciais.py
-│   └── tests/                 # pytest (356 funções de teste) + corpus rotulado
+│   │   ├── detectores/        # 10 detectores Python + base/comum, 16 CWEs
+│   │   │   ├── base.py        # Protocol Detector + ordenação
+│   │   │   ├── comum.py       # helpers de sink por argumento
+│   │   │   ├── sqli.py  xss.py  idor.py  xxe.py
+│   │   │   ├── path_traversal.py  open_redirect.py  csrf.py
+│   │   │   └── autorizacao.py  autenticacao.py  credenciais.py
+│   │   └── poliglota/         # outras linguagens via tree-sitter (extra [linguagens])
+│   │       ├── fonte.py  motor.py  detector.py  perfil.py  registro.py   # base comum
+│   │       └── javascript.py  java.py  php.py  html.py                   # um perfil por linguagem
+│   └── tests/                 # pytest (24 arquivos, 434 funções, 613 testes) + corpus
 │       ├── conftest.py        # atalhos de gabarito para os testes
-│       ├── test_*.py          # 19 arquivos, um por camada/detector
-│       └── amostras/          # corpus de avaliação (vulneravel/, seguro/, analisador/, config/)
+│       ├── test_*.py          # um arquivo por camada/detector/linguagem
+│       └── amostras/          # corpus rotulado (vulneravel/, seguro/, poliglota/, analisador/)
 │
-├── frontend/                  # SPA React/Vite/Tailwind — protótipo visual (não chama a API)
+├── frontend/                  # site de demonstração (React/Vite/Tailwind), publicado na Vercel
 │   ├── package.json / vite.config.js / tailwind.config.js / postcss.config.js / .oxlintrc.json
 │   ├── index.html             # shell HTML (favicon inline, #root)
 │   ├── public/                # favicon.svg, icons.svg
 │   └── src/
 │       ├── main.jsx           # bootstrap React
-│       ├── App.jsx            # UI inteira (382 linhas, arquivo único)
+│       ├── App.jsx            # UI inteira (arquivo único); análise simplificada no navegador
 │       ├── translate.js       # dicionário i18n pt/en
 │       ├── index.css          # diretivas Tailwind
-│       ├── App.css            # vazio
-│       └── assets/            # imagens (hero.png, logos)
+│       └── api.js / Resultado.jsx  # cliente da API e painel de resultado — prontos, ainda não ligados
 │
 ├── docs/                      # documentação do projeto
-│   ├── arquitetura.md         # ★ arquitetura real (preenchido)
-│   ├── estrutura.md           # ★ este documento
+│   ├── MAPA-DO-PROJETO.md     # ★ onde está cada coisa (mapa rápido)
+│   ├── arquitetura.md         # componentes, decisões, riscos
+│   ├── estrutura.md           # este documento
+│   ├── instalacao.md  configuracao.md  api.md  deploy.md
+│   ├── fluxos.md  seguranca.md  banco-de-dados.md  guia-desenvolvedor.md
 │   ├── requisitos.md          # template genérico (não preenchido)
+│   ├── Artigo_Vulnerabilidades_Codigo_IA.pdf   # artigo acadêmico de referência
+│   ├── teste/                 # exemplos vulneráveis para testar + roteiro de demonstração
+│   ├── historico/             # auditoria da documentação (registro do processo)
 │   ├── decisoes/              # ADRs — apenas README + template
 │   └── reunioes/              # atas — apenas README + template
 │
-├── sprints/                   # registros de sprint (sprint-00 = template; README; template)
+├── sprints/                   # registros de sprint (README, sprint-00, template)
 ├── entregas/                  # entregas avaliativas (README, template, fontes/equipe)
-└── .github/                   # templates de issue (bug/requisito/documentacao/pesquisa/config)
-                               # e de PR — sem workflows (não há CI/CD)
+└── .github/                   # templates de issue e de PR — sem workflows (não há CI/CD)
 ```
 
 ## Finalidade dos diretórios
@@ -329,7 +337,7 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 - **Principais funções**: `linhas_esperadas()`, `linhas_de_limitacao()`, `rodar_detector()` (código em memória), `rodar_detector_em_arquivo()` (amostra do corpus).
 - **Depende de**: `metricas.py`, `analisador.py`, `motor/taint.py`.
 
-#### Arquivos de teste (19, 356 `def test`; coleta maior por parametrizados)
+#### Arquivos de teste (24, 434 `def test`; 613 coletados por causa dos parametrizados)
 
 | Arquivo | Cobre | Testes |
 | --- | --- | --- |
@@ -341,9 +349,11 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 | `test_sqli.py` · `test_xss.py` · `test_idor.py` · `test_xxe.py` · `test_path_traversal.py` · `test_open_redirect.py` · `test_csrf_autorizacao.py` · `test_autenticacao.py` · `test_credenciais.py` | cada detector contra amostras e código em memória | 15·22·22·14·11·8·17·32·15 |
 | `test_configuracao.py` | parsers de configuração + detector nelas | 17 |
 | `test_relatorio.py` | formatação texto/JSON | 21 |
-| `test_api.py` | endpoints, validações, limites, erros | 26 |
-| `test_integracao.py` | CLI ponta-a-ponta + exit codes | 20 |
+| `test_api.py` | endpoints, validações, limites, erros | 27 |
+| `test_integracao.py` | CLI ponta-a-ponta + exit codes | 22 |
 | `test_metricas.py` | gabarito e cálculo de métricas | 19 |
+| `test_poliglota_javascript.py` · `test_poliglota_java.py` · `test_poliglota_php.py` · `test_poliglota_html.py` | perfis tree-sitter de JS/TS, Java, PHP e HTML | 25·20·20·7 |
+| `test_documento_teste.py` | `docs/teste/app_vulneravel.py` produz os 8 achados do roteiro de demonstração | 3 |
 
 #### `tests/amostras/` (corpus, dupla função: fixtures + avaliação)
 
@@ -355,7 +365,7 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 
 ### Frontend (`frontend/`)
 
-#### `frontend/src/App.jsx` (382 linhas)
+#### `frontend/src/App.jsx` (486 linhas)
 
 - **Função**: aplicação inteira em arquivo único.
 - **Responsabilidade**: estado de navegação (`paginaAtual`), tema dark/light persistido em `localStorage` (`aegis-tema`), i18n pt/en, abas de análise (file/url/snippet/cli), drag & drop (arquivos ficam só no `useState` — **nenhum envio**), páginas estáticas com texto hardcoded (docs oficial, termos, privacidade, como usar, FAQ, scripts).
@@ -382,19 +392,23 @@ Legenda: **Depende de** = imports internos do pacote; **Dependentes** = quem o i
 | Arquivo | Função | Estado |
 | --- | --- | --- |
 | `README.md` | identificação institucional, problema, solução proposta, links | preenche problema/solução; backlog "vincular" pendente; cita pre-commit/CI ainda inexistentes |
-| `TOOL/README.md` | **documentação técnica principal**: tabela de cobertura (16 CWEs), uso, API HTTP, limitações do motor, calibração de confiança, avaliação, estado das fases | completo e denso; "Estado" lista até Fase 16 (git mostra Fase 19) |
-| `TOOL/CLAUDE.md` | princípios de desenvolvimento (AST nunca regex, contrato do achado, mapa CWE→OWASP fixo, IDOR heurístico, fases pequenas com teste+commit) | referência obrigatória para contribuir |
+| `TOOL/README.md` | **documentação técnica principal**: tabela de cobertura (16 CWEs), uso, API HTTP, limitações do motor, calibração de confiança, avaliação, estado das fases | completo e denso; "Estado" registra as fases até a 26 |
+| `TOOL/PRINCIPIOS.md` | princípios de desenvolvimento (AST nunca regex, contrato do achado, mapa CWE→OWASP fixo, IDOR heurístico, fases pequenas com teste+commit) | referência obrigatória para contribuir |
 | `docs/arquitetura.md` | arquitetura real do sistema | ✅ preenchido (etapa 02) |
 | `docs/estrutura.md` | este inventário | ✅ |
 | `docs/requisitos.md` | requisitos do produto | template genérico, não preenchido |
 | `docs/decisoes/` · `docs/reunioes/` | ADRs e atas | apenas README + template |
 | `SECURITY.md` | política de segredos/incidentes | preenchido (genérico institucional) |
-| `CHANGELOG.md` | histórico | parado na Sprint 00 |
-| `CONTRIBUTING.md` · `CODE_OF_CONDUCT.md` · `LICENSE` | contribuição, conduta, licença | templates; LICENSE é placeholder sem licença efetiva |
+| `CHANGELOG.md` | histórico de mudanças por marco | atualizado |
+| `CONTRIBUTING.md` · `CODE_OF_CONDUCT.md` · `LICENSE` | contribuição, conduta, licença | CONTRIBUTING e CODE_OF_CONDUCT são templates; LICENSE = MIT |
 | `sprints/sprint-00-planejamento.md` | registro da sprint inicial | template não preenchido |
 | `entregas/fontes/equipe` | contatos da equipe | ⚠️ contém e-mails institucionais no repositório |
 | `.github/ISSUE_TEMPLATE/*.yml` · `PULL_REQUEST_TEMPLATE.md` | padronização de issues/PRs | ativos; sem workflows (não há CI/CD) |
-| `Artigo_Vulnerabilidades_Codigo_IA.pdf` | artigo acadêmico de base (motivação do problema) | referência |
+| `docs/Artigo_Vulnerabilidades_Codigo_IA.pdf` | artigo acadêmico de base (motivação do problema) | referência |
+| `aegis.py` · `AEGIS.ipynb` | atalhos de uso (modo guiado no terminal; notebook Colab com caixa para colar código) | ativos |
+| `docs/deploy.md` | publicação do site (Vercel) e da API | ✅ |
+| `docs/teste/` | exemplos vulneráveis + roteiro de demonstração | ✅ (ver `docs/teste/README.md`) |
+| `docs/historico/documentation-audit.md` | auditoria da documentação × código | registro histórico |
 
 ## Grafo de dependências (imports internos verificados)
 
@@ -419,7 +433,7 @@ Regras estruturais observadas no código: dependências são unidirecionais (nã
 ## Trilha de leitura recomendada
 
 **Para entender o produto (1–2 h):**
-`TOOL/CLAUDE.md` → `TOOL/README.md` → `docs/arquitetura.md` → `achado.py` → `varredura.py` → `cli.py`.
+`TOOL/PRINCIPIOS.md` → `TOOL/README.md` → `docs/arquitetura.md` → `achado.py` → `varredura.py` → `cli.py`.
 
 **Para contribuir com um detector novo:**
 `achado.py` (contrato) → `detectores/base.py` (Protocol) → `detectores/sqli.py` (padrão taint mínimo, 79 linhas) → `motor/catalogo.py` (onde declarar fonte/sink/sanitizador) → `motor/taint.py` (`Escopo`/`Procedencia`) → `detectores/idor.py` (padrão heurístico, se for candidato) → `tests/test_sqli.py` + `tests/amostras/` (como testar e rotular) → `varredura.py` (registrar em `detectores_padrao`).
@@ -435,4 +449,4 @@ Regras estruturais observadas no código: dependências são unidirecionais (nã
 
 ## Exclusões
 
-Não fichados por serem gerados, binários, de terceiros ou sem conteúdo: `node_modules/`, `package-lock.json`, `.git/`, `__pycache__/`, `*.egg-info/`, `.venv/`, `.pytest_cache/`, `frontend/src/assets/*` (imagens), `frontend/public/*` (SVGs estáticos), `frontend/src/App.css` (vazio), `frontend/src/index.css` (2 linhas: diretivas Tailwind), `sprints/template-sprint.md`, `entregas/template-entrega.md`, `docs/decisoes/template-adr.md`, `docs/reunioes/template-reuniao.md` (templates institucionais em branco), READMEs de `sprints/`, `entregas/`, `docs/decisoes/`, `docs/reunioes/` (texto padrão de orientação).
+Não fichados por serem gerados, binários, de terceiros ou sem conteúdo: `node_modules/`, `package-lock.json`, `.git/`, `__pycache__/`, `*.egg-info/`, `.venv/`, `.pytest_cache/`, `frontend/public/*` (SVGs estáticos), `frontend/src/index.css` (2 linhas: diretivas Tailwind), `sprints/template-sprint.md`, `entregas/template-entrega.md`, `docs/decisoes/template-adr.md`, `docs/reunioes/template-reuniao.md` (templates institucionais em branco), READMEs de `sprints/`, `entregas/`, `docs/decisoes/`, `docs/reunioes/` (texto padrão de orientação).

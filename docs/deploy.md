@@ -53,8 +53,9 @@ dele, e precisa ser dita com clareza antes de qualquer passo de deploy.
     site.
   - A publicação na Vercel **não depende do backend**. A API pode estar fora
     do ar sem impacto no site.
-  - `docs/teste/ROTEIRO_DE_TESTE.md` descreve um fluxo (abas FICHEIRO / CÓDIGO /
-    URL retornando achados do motor) que **não corresponde mais ao código**.
+  - O roteiro de demonstração (`docs/teste/ROTEIRO_DE_DEMONSTRACAO.md`) usa o
+    `aegis.py`, o notebook Colab e a API — não o site, cujas abas não retornam
+    achados do motor.
 - O valor do site é demonstrativo: ele apresenta o produto, sua interface e
   suas telas. O produto em si é o motor `owaspscan`, distribuído via pip e
   exposto pela API.
@@ -510,7 +511,7 @@ Observações importantes:
 - **`client_max_body_size` é obrigatório**, não cosmético. O caminho JSON faz
   `await request.json()` antes de qualquer verificação de tamanho
   (`api.py:142`), então um corpo JSON gigante é carregado em memória sem
-  limite pela aplicação — `docs/API.md` §"Limitações conhecidas" registra isso
+  limite pela aplicação — `docs/api.md` §"Limitações conhecidas" registra isso
   como limitação 2. O limite do nginx é a única barreira.
 - **`limit_req` é a única proteção contra abuso de CPU.** A API não tem rate
   limit, e requisições simultâneas ilimitadas competem pelo mesmo processo
@@ -540,7 +541,7 @@ este projeto, pelos seguintes motivos concretos:
 - O filesystem da Function é somente-leitura, com `/tmp` gravável até 500 MB.
   A pasta temporária da API funciona, mas o limite é outro.
 - Duração máxima da Function: 300 s por padrão (Hobby). O motor não impõe
-  timeout de análise (`docs/API.md` §"Limitações conhecidas", item 3).
+  timeout de análise (`docs/api.md` §"Limitações conhecidas", item 3).
 - Python 3.12+ é obrigatório na Vercel; o projeto declara `>=3.11`, o que
   satisfaz.
 - A Function é dimensionada por CPU, o que combina bem com um serviço
@@ -619,14 +620,14 @@ partir do código.
 ```bash
 cd /opt/aegis/repo/TOOL
 
-# 1. Suíte de testes (356 funções; a coleta é maior por causa das
+# 1. Suíte de testes (434 funções; 613 coletados por causa das
 #    parametrizações).
 .venv/bin/python -m pytest -v
 # Esperado: todos passam, sem erro de coleta.
 
 # 2. Métricas do motor contra o corpus rotulado.
 .venv/bin/python -m owaspscan.metricas tests/amostras
-# Esperado: precisão 1.00, recall 0.98, F1 0.99 (medido no corpus próprio).
+# Esperado: precisão 1.00, recall 0.97, F1 0.98 (medido no corpus próprio).
 
 # 3. CLI detectando severidade alta -> exit code 1.
 .venv/bin/python -m owaspscan tests/amostras/vulneravel ; echo "exit=$?"
@@ -675,7 +676,7 @@ No navegador, sobre **<https://aegisscan-zeta.vercel.app/>**:
 | V2 | Alternar tema claro/escuro | A cor da aba (`meta-theme-color`) e o fundo mudam |
 | V3 | Alternar idioma PT/EN | Todos os textos mudam |
 | V4 | Navegar pelo menu (Como Usar, FAQ, Scripts, Termos, Privacidade) | As "páginas" trocam de conteúdo (navegação por estado do React, sem mudança de URL) |
-| V5 | Aba FICHEIRO — enviar `frontend/src/teste.js` | O painel lista 4 achados: CWE-94 (Code Injection), CWE-79 (DOM XSS), CWE-798 (credencial exposta) e CWE-319 (tráfego HTTP) |
+| V5 | Aba FICHEIRO — enviar `docs/teste/script_frontend.js` | O painel lista 4 achados: CWE-94 (Code Injection), CWE-79 (DOM XSS), CWE-798 (credencial exposta) e CWE-319 (tráfego HTTP) |
 | V6 | Aba CÓDIGO — colar um trecho | O painel mostra os achados do scan local (regex do navegador) |
 | V7 | Aba URL — colar um endereço `http://` | O painel acusa tráfego não criptografado (CWE-319) |
 | V8 | Painel → Vercel → Deployments | Status **Ready**, sem erro de build |
@@ -940,7 +941,7 @@ Variáveis de plataforma (não do projeto): `VERCEL_ENV`, `VERCEL_URL`,
 
 ## Apêndice C — Riscos e lacunas conhecidos
 
-Registrado em `docs/seguranca.md` e `docs/API.md`; reproduzido aqui porque
+Registrado em `docs/seguranca.md` e `docs/api.md`; reproduzido aqui porque
 determina como a API pode ser exposta.
 
 | # | Risco | Onde | Mitigação no deploy |
@@ -979,8 +980,8 @@ import Resultado from './Resultado';
 ```
 
 E a substituir a análise local por regex (`analisarTexto` / `REGRAS_SAST`) pela
-chamada à API. O `docs/teste/ROTEIRO_DE_TESTE.md` já descreve o roteiro de
-verificação esperado para esse fluxo (8 achados em `docs/teste/app_vulneravel.py`).
+chamada à API. A seção 5 de `docs/teste/ROTEIRO_DE_DEMONSTRACAO.md` traz o resultado
+esperado para esse fluxo (8 achados em `docs/teste/app_vulneravel.py`).
 
 ### D.2 Configuração (frontend na Vercel)
 
@@ -1030,9 +1031,9 @@ endereço, não um segredo), mas significa que a URL do backend é pública.
 
 - Instalação e verificação passo a passo: [`docs/instalacao.md`](instalacao.md)
 - Inventário de configurações e variáveis: [`docs/configuracao.md`](configuracao.md)
-- Contrato da API HTTP: [`docs/API.md`](API.md)
+- Contrato da API HTTP: [`docs/api.md`](api.md)
 - Ausência de persistência: [`docs/banco-de-dados.md`](banco-de-dados.md)
 - Riscos e recomendações de segurança: [`docs/seguranca.md`](seguranca.md)
 - Arquitetura e limitações: [`docs/arquitetura.md`](arquitetura.md)
 - Documentação do motor e cobertura: [`TOOL/README.md`](../TOOL/README.md)
-- Roteiro de teste do fluxo site+API: [`docs/teste/ROTEIRO_DE_TESTE.md`](teste/ROTEIRO_DE_TESTE.md)
+- Roteiro de demonstração e resultado esperado: [`docs/teste/ROTEIRO_DE_DEMONSTRACAO.md`](teste/ROTEIRO_DE_DEMONSTRACAO.md)

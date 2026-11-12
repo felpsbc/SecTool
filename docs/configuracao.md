@@ -86,7 +86,7 @@ Obrigatório para instalar o TOOL (`pip install -e .`); nunca precisa ser editad
 
 | Seção | Conteúdo | Impacto se incorreta/ausente |
 | --- | --- | --- |
-| `[project]` | `name = "owaspscan"`, `version = "0.2.0"`, `requires-python = ">=3.11"`, `dependencies = []` | remover `requires-python` permitiria instalar em Python <3.11, onde o código falha (`match/case`). Adicionar `dependencies` violaria o princípio "núcleo stdlib-only" (`CLAUDE.md`) |
+| `[project]` | `name = "owaspscan"`, `version = "0.2.0"`, `requires-python = ">=3.11"`, `dependencies = []` | remover `requires-python` permitiria instalar em Python <3.11, onde o código falha (`match/case`). Adicionar `dependencies` violaria o princípio "núcleo stdlib-only" (`PRINCIPIOS.md`) |
 | `[project.optional-dependencies]` | `api = [fastapi>=0.110, uvicorn>=0.29, python-multipart>=0.0.9]` · `dev = [pytest>=8.0, httpx>=0.27]` | instalar sem `[api]` → `ModuleNotFoundError: fastapi` ao rodar `python -m owaspscan.api`; sem `[dev]` → pytest/httpx ausentes |
 | `[build-system]` | `setuptools>=68` | setuptools antigo → falha no build do wheel |
 | `[tool.setuptools.packages.find]` | `include = ["owaspscan*"]` | sem isso, subpacotes (`motor/`, `detectores/`) poderiam ficar fora da instalação |

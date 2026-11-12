@@ -1,7 +1,7 @@
 """Detectores de falhas de autenticacao e de protecao de credenciais.
 
 Reune os detectores do tema "Authentication Failures". A classificacao OWASP
-segue a CWE, nao o tema (ver CLAUDE.md):
+segue a CWE, nao o tema (ver PRINCIPIOS.md):
 
 - JWT aceito sem verificar assinatura ........ CWE-287  A07
 - Hash rapido (md5/sha*) aplicado a senha .... CWE-916  A02

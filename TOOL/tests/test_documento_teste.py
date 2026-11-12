@@ -1,7 +1,7 @@
-"""Fase 20: o arquivo do roteiro de teste do site produz o resultado documentado.
+"""O arquivo do roteiro de demonstracao produz o resultado documentado.
 
-docs/teste/ROTEIRO_DE_TESTE.md diz o que a pessoa deve ver na pagina ao
-enviar docs/teste/app_vulneravel.py. Se o motor mudar, este teste avisa que
+docs/teste/ROTEIRO_DE_DEMONSTRACAO.md (secao 5) diz o que a pessoa deve ver ao
+analisar docs/teste/app_vulneravel.py. Se o motor mudar, este teste avisa que
 o roteiro precisa ser atualizado junto.
 """
 

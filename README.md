@@ -7,10 +7,22 @@ O AEGIS é uma ferramenta de análise estática de segurança (SAST): ele lê o 
 Analisa **Python (Flask/Django), JavaScript/TypeScript, Java, PHP, HTML** e arquivos de configuração (`.env`, YAML, JSON, INI, TOML, `.properties`).
 
 [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/felpsbc/SecTool/blob/main/AEGIS.ipynb)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
+![OWASP Top 10:2021](https://img.shields.io/badge/OWASP-Top%2010%3A2021-orange)
+![Testes](https://img.shields.io/badge/testes-613%20passando-brightgreen)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-green)](LICENSE)
+
+## Início rápido
+
+| Opção | Como | Tempo |
+| --- | --- | --- |
+| **No navegador** (sem instalar nada) | Clique em **Abrir no Colab** acima → ▶ na primeira célula → cole seu código → **Analisar** | ~1 min |
+| **No computador** | Baixe o repositório e rode `python aegis.py` (Windows: dois cliques no `aegis.py`) → arraste a pasta do projeto | ~1 min na 1ª vez |
+| **Vai apresentar o projeto?** | Siga o [roteiro de demonstração](docs/teste/ROTEIRO_DE_DEMONSTRACAO.md) | 5–7 min |
 
 Repositório: <https://github.com/felpsbc/SecTool> · Site de demonstração: <https://aegisscan-zeta.vercel.app/>
 
-> **Sobre o site:** ele apresenta a interface do AEGIS e faz uma análise **simplificada** no próprio navegador; ele **não** usa o motor `owaspscan` nem a API (detalhes em [`docs/deploy.md`](docs/deploy.md#o-site-publicado-é-uma-demonstração-do-produto-não-um-cliente-da-api)). Para o resultado completo — o que este README ensina — use o **Colab** ou o **`aegis.py`**.
+> **Sobre o site:** ele apresenta a interface do AEGIS com uma análise **simplificada** feita no navegador — **não** usa o motor completo ([detalhes](docs/deploy.md#o-site-publicado-é-uma-demonstração-do-produto-não-um-cliente-da-api)). Para o resultado completo, use o **Colab** ou o **`aegis.py`**.
 
 ## Identificação do repositório
 
@@ -32,8 +44,9 @@ Repositório: <https://github.com/felpsbc/SecTool> · Site de demonstração: <h
 6. [Problemas comuns (Windows e Linux)](#6-problemas-comuns)
 7. [Uso avançado (CLI, JSON, API, site, CI/CD, testes)](#7-uso-avançado)
 8. [O que o AEGIS detecta](#8-o-que-o-aegis-detecta)
-9. [Sobre o projeto (problema, arquitetura, documentação)](#9-sobre-o-projeto)
-10. [Uso responsável e licença (MIT)](#uso-responsável)
+9. [Sobre o projeto (problema, tecnologias, arquitetura)](#9-sobre-o-projeto)
+10. [**Onde está cada coisa** (código e documentação)](#10-onde-está-cada-coisa)
+11. [Uso responsável e licença (MIT)](#11-uso-responsável-e-licença)
 
 ---
 
@@ -276,12 +289,12 @@ python3 aegis.py caminho/do/projeto
 
 ## 5. Como ler o relatório
 
-O relatório começa com um **resumo executivo** e depois lista cada achado assim:
+O relatório começa com um **resumo executivo** e depois lista cada achado. Exemplo real, de `docs/teste/app_vulneravel.py`:
 
 ```text
   [ALTA / confianca alta] CWE-89 SQL Injection
-    app_vulneravel.py:43  (A03:2021 Injection)
-    > cursor.execute("SELECT * FROM usuarios WHERE id = " + ident)
+    app_vulneravel.py:24  (A03:2021 Injection)
+    > cursor.execute("SELECT nome, preco FROM produtos WHERE id = " + ident)
     Dado nao confiavel vindo de request.args alcanca a string SQL de
     cursor.execute (DB-API) sem parametrizacao, permitindo alterar a
     estrutura da query.
@@ -416,19 +429,19 @@ python3 aegis.py --api          # Windows: py aegis.py --api
 curl -F "arquivos=@app.py" http://127.0.0.1:8000/analisar     # Windows: curl.exe -F ...
 ```
 
-Variáveis opcionais: `OWASPSCAN_HOST` (padrão `127.0.0.1`), `OWASPSCAN_PORTA` (`8000`), `OWASPSCAN_ORIGENS` (CORS, padrão `*`) — no Linux `export OWASPSCAN_PORTA=9000`, no Windows `set OWASPSCAN_PORTA=9000` (cmd) ou `$env:OWASPSCAN_PORTA=9000` (PowerShell). Contrato completo: [`docs/API.md`](docs/API.md) · configurações: [`docs/configuracao.md`](docs/configuracao.md). Uploads são destruídos ao fim de cada requisição; não há banco de dados.
+Variáveis opcionais: `OWASPSCAN_HOST` (padrão `127.0.0.1`), `OWASPSCAN_PORTA` (`8000`), `OWASPSCAN_ORIGENS` (CORS, padrão `*`) — no Linux `export OWASPSCAN_PORTA=9000`, no Windows `set OWASPSCAN_PORTA=9000` (cmd) ou `$env:OWASPSCAN_PORTA=9000` (PowerShell). Contrato completo: [`docs/api.md`](docs/api.md) · configurações: [`docs/configuracao.md`](docs/configuracao.md). Uploads são destruídos ao fim de cada requisição; não há banco de dados.
 
 ### Site (frontend)
 
-Requer **Node.js ^20.19.0 ou ≥22.12.0** (Windows: `winget install OpenJS.NodeJS.LTS`; Linux: <https://nodejs.org> ou `nvm`). Com a API rodando em outro terminal:
+Requer **Node.js ^20.19.0 ou ≥22.12.0** (Windows: `winget install OpenJS.NodeJS.LTS`; Linux: <https://nodejs.org> ou `nvm`):
 
 ```bash
 cd frontend
 npm install
-npm run dev        # http://localhost:5173 — /api é repassado para :8000
+npm run dev        # http://localhost:5173
 ```
 
-O frontend é o mesmo do [site de demonstração](https://aegisscan-zeta.vercel.app/): a análise que ele mostra é feita no navegador e **não** chama a API — `frontend/src/api.js` existe, mas não está ligado ao `App.jsx`. Por isso o `docs/teste/ROTEIRO_DE_TESTE.md` não corresponde mais ao site. Estado atual e como reconectar o site à API: [`docs/deploy.md`](docs/deploy.md).
+O frontend é o mesmo do [site de demonstração](https://aegisscan-zeta.vercel.app/): a análise que ele mostra é feita no navegador e **não** chama a API — o cliente da API (`frontend/src/api.js`) está pronto, mas não está ligado ao `App.jsx`. Detalhes em [`frontend/README.md`](frontend/README.md); como reconectar o site à API: [`docs/deploy.md`](docs/deploy.md), Apêndice D.
 
 ### CI/CD (bloquear merge com falha alta)
 
@@ -504,59 +517,90 @@ API (api.py) ───────────┘        │
 
 Sem banco de dados, sem serviços externos, sem persistência. Detalhes: [`docs/arquitetura.md`](docs/arquitetura.md) e [`docs/fluxos.md`](docs/fluxos.md).
 
-### Estrutura do projeto
-
-```
-├── aegis.py               # atalho: modo guiado (arraste a pasta) ou comandos; prepara o ambiente sozinho
-├── AEGIS.ipynb            # notebook para Google Colab / Jupyter
-├── TOOL/                  # motor SAST "owaspscan" (produto principal)
-│   ├── owaspscan/         #   núcleo: achado, analisador, motor/, detectores/, poliglota/,
-│   │                      #   varredura, relatorio, cli, api, metricas, configuracao
-│   └── tests/             #   pytest + amostras/ (corpus rotulado)
-├── frontend/              # site de demonstração (React), publicado na Vercel
-├── docs/                  # documentação técnica detalhada
-├── sprints/ entregas/     # gestão da disciplina
-└── .github/               # templates de issue/PR
-```
-
-Inventário arquivo a arquivo: [`docs/estrutura.md`](docs/estrutura.md).
-
-### Documentação
-
-| Documento | Conteúdo |
-| --- | --- |
-| [`docs/arquitetura.md`](docs/arquitetura.md) | componentes, responsabilidades, decisões técnicas, riscos |
-| [`docs/estrutura.md`](docs/estrutura.md) | inventário de arquivos e grafo de dependências |
-| [`docs/instalacao.md`](docs/instalacao.md) | setup do zero, verificação, problemas comuns |
-| [`docs/configuracao.md`](docs/configuracao.md) | configurações e variáveis de ambiente |
-| [`docs/API.md`](docs/API.md) | contrato completo da API HTTP |
-| [`docs/banco-de-dados.md`](docs/banco-de-dados.md) | ausência de persistência e entidades em memória |
-| [`docs/fluxos.md`](docs/fluxos.md) | fluxos de negócio passo a passo |
-| [`docs/seguranca.md`](docs/seguranca.md) | mecanismos de segurança do sistema |
-| [`docs/guia-desenvolvedor.md`](docs/guia-desenvolvedor.md) | onboarding: onde investigar bugs, onde implementar |
-| [`TOOL/README.md`](TOOL/README.md) | documentação técnica do motor (cobertura, limitações, avaliação) |
-| [`TOOL/CLAUDE.md`](TOOL/CLAUDE.md) | princípios de desenvolvimento do motor |
-
 ### Para quem vai contribuir
 
-- **Princípios inegociáveis do motor** (`TOOL/CLAUDE.md`): detecção via AST (nunca regex sobre código); classificação sempre derivada do mapa CWE→OWASP em `achado.py`; IDOR e demais heurísticas reportam **candidatos** com confiança baixa; honestidade científica acima de cobertura.
+- **Princípios inegociáveis do motor** (`TOOL/PRINCIPIOS.md`): detecção via AST (nunca regex sobre código); classificação sempre derivada do mapa CWE→OWASP em `achado.py`; IDOR e demais heurísticas reportam **candidatos** com confiança baixa; honestidade científica acima de cobertura.
 - **Processo**: fases pequenas, teste ao fim de cada fase, um commit por fase que passa nos testes. Veja [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - **Comece por**: `TOOL/owaspscan/achado.py` (contrato) → `varredura.py` (pipeline) → `detectores/sqli.py` (menor detector completo). Roteiro completo no [guia do desenvolvedor](docs/guia-desenvolvedor.md).
 - **Segurança do repositório**: não commite credenciais reais ([`SECURITY.md`](SECURITY.md)); os segredos em `TOOL/tests/amostras/` são fictícios.
 - Encontrou um falso positivo ou uma falha que o AEGIS deixou passar? Abra uma issue com o trecho de código — isso alimenta o corpus de avaliação.
 
-## Uso responsável
+---
+
+## 10. Onde está cada coisa
+
+```
+SecTool/
+├── README.md              ← você está aqui: uso, relatório e mapa do projeto
+├── aegis.py               ← usar no computador (modo guiado ou comandos)
+├── AEGIS.ipynb            ← usar no Google Colab (caixa para colar código)
+├── TOOL/                  ← o produto: motor de análise "owaspscan"
+│   ├── owaspscan/         │  código-fonte (motor, detectores, linguagens, CLI, API)
+│   └── tests/             │  testes automáticos + corpus rotulado (amostras/)
+├── frontend/              ← site de demonstração (React), publicado na Vercel
+├── docs/                  ← documentação técnica
+│   └── teste/             │  exemplos vulneráveis + roteiro de demonstração
+├── sprints/  entregas/    ← gestão da disciplina
+└── LICENSE  SECURITY.md  CONTRIBUTING.md  CODE_OF_CONDUCT.md  CHANGELOG.md
+```
+
+**Para usar e apresentar**
+
+| Quero… | Onde |
+| --- | --- |
+| Usar sem instalar | [`AEGIS.ipynb`](AEGIS.ipynb) (botão **Abrir no Colab** no topo) |
+| Usar no computador | [`aegis.py`](aegis.py) — passo a passo nas seções [3](#3-windows--passo-a-passo) e [4](#4-linux-e-macos--passo-a-passo) |
+| Exemplos de código vulnerável para testar | [`docs/teste/`](docs/teste/README.md) |
+| Roteiro para apresentar a ferramenta | [`docs/teste/ROTEIRO_DE_DEMONSTRACAO.md`](docs/teste/ROTEIRO_DE_DEMONSTRACAO.md) |
+| Ver o site | <https://aegisscan-zeta.vercel.app/> · código em [`frontend/`](frontend/README.md) |
+
+**Documentação técnica**
+
+| Documento | Conteúdo |
+| --- | --- |
+| [`docs/MAPA-DO-PROJETO.md`](docs/MAPA-DO-PROJETO.md) | mapa rápido: onde está cada parte do sistema, com caminhos reais |
+| [`TOOL/README.md`](TOOL/README.md) | documentação do motor: cobertura por linguagem, limitações, avaliação |
+| [`TOOL/PRINCIPIOS.md`](TOOL/PRINCIPIOS.md) | princípios de desenvolvimento do motor (regras inegociáveis) |
+| [`docs/arquitetura.md`](docs/arquitetura.md) | componentes, responsabilidades, decisões técnicas, riscos |
+| [`docs/fluxos.md`](docs/fluxos.md) | fluxos passo a passo (CLI, API, métricas, site) |
+| [`docs/estrutura.md`](docs/estrutura.md) | inventário arquivo a arquivo e grafo de dependências |
+| [`docs/instalacao.md`](docs/instalacao.md) | instalação manual completa, verificação, problemas comuns |
+| [`docs/configuracao.md`](docs/configuracao.md) | configurações e variáveis de ambiente |
+| [`docs/api.md`](docs/api.md) | contrato completo da API HTTP (`POST /analisar`, `GET /saude`) |
+| [`docs/deploy.md`](docs/deploy.md) | publicação do site (Vercel) e da API; como ligar o site à API |
+| [`docs/seguranca.md`](docs/seguranca.md) | mecanismos de segurança da própria ferramenta |
+| [`docs/banco-de-dados.md`](docs/banco-de-dados.md) | por que não há banco de dados; entidades em memória |
+| [`docs/guia-desenvolvedor.md`](docs/guia-desenvolvedor.md) | onboarding: onde investigar bugs e implementar novidades |
+| [`docs/Artigo_Vulnerabilidades_Codigo_IA.pdf`](docs/Artigo_Vulnerabilidades_Codigo_IA.pdf) | artigo acadêmico que fundamenta o problema |
+
+**Gestão do projeto e governança**
+
+| Onde | Conteúdo |
+| --- | --- |
+| [`sprints/`](sprints/README.md) · [`entregas/`](entregas/README.md) | registros de sprint e entregas avaliativas da disciplina |
+| [`docs/requisitos.md`](docs/requisitos.md) · [`docs/decisoes/`](docs/decisoes/README.md) · [`docs/reunioes/`](docs/reunioes/README.md) | requisitos, decisões (ADRs) e atas — modelos da disciplina |
+| [`docs/historico/`](docs/historico/documentation-audit.md) | auditoria da documentação (registro do processo) |
+| [`CHANGELOG.md`](CHANGELOG.md) | histórico de mudanças |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | como contribuir e código de conduta |
+| [`SECURITY.md`](SECURITY.md) | política de segredos e incidentes |
+| [`LICENSE`](LICENSE) | licença MIT |
+
+---
+
+## 11. Uso responsável e licença
+
+### Uso responsável
 
 O AEGIS foi feito para **ajudar desenvolvedores a encontrar e corrigir falhas no próprio código**. Ao usá-lo, você concorda que:
 
 - deve analisar apenas código **seu** ou que você tenha **autorização** para analisar;
 - os resultados são **apoio à revisão**, não uma garantia de segurança: podem existir falsos positivos (principalmente nos *candidatos heurísticos*) e falhas que a ferramenta não detecta (veja a [seção 8](#8-o-que-o-aegis-detecta) e as limitações em [`TOOL/README.md`](TOOL/README.md));
 - o AEGIS **não substitui** uma auditoria de segurança profissional nem testes de intrusão autorizados;
-- a responsabilidade pelo uso da ferramenta e pelas decisões tomadas com base nos relatórios é de **quem a utiliza**. Os autores não se responsabilizam por usos indevidos, ilegais ou sem autorização, nem por danos decorrentes do uso (ver a licença abaixo).
+- a responsabilidade pelo uso da ferramenta e pelas decisões tomadas com base nos relatórios é de **quem a utiliza**. Os autores não se responsabilizam por usos indevidos, ilegais ou sem autorização, nem por danos decorrentes do uso (ver a licença a seguir).
 
 Os exemplos vulneráveis do repositório (`docs/teste/`, `TOOL/tests/amostras/`) existem só para teste da ferramenta: **não os execute nem os publique** como aplicação real.
 
-## Licença
+### Licença
 
 Distribuído sob a **licença MIT** — veja [`LICENSE`](LICENSE). Em resumo: você pode usar, copiar, modificar e distribuir o projeto, inclusive comercialmente, desde que mantenha o aviso de copyright e de licença. O software é fornecido **"no estado em que se encontra" (*as is*), sem garantias de qualquer tipo**, e os autores não respondem por reclamações, danos ou outras responsabilidades decorrentes do seu uso.
 

@@ -1,10 +1,13 @@
-# Projeto: OWASP-Scan — Analisador de Vulnerabilidades em Código Python
+# Princípios de desenvolvimento do motor (owaspscan)
+
+Regras que todo código do motor deve seguir. Leitura obrigatória antes de contribuir.
 
 ## Contexto
 Ferramenta de Iniciação Científica (Ciência da Computação, UniCEUB).
-Analisa código Python (Django/Flask) e detecta vulnerabilidades do
-OWASP Top 10, começando por SQLi, XSS e IDOR. Emite um resumo
-executivo dos achados.
+Analisa código Python (Django/Flask), JavaScript/TypeScript, Java, PHP,
+HTML e arquivos de configuração, e detecta vulnerabilidades do OWASP
+Top 10:2021. Emite um resumo executivo dos achados com recomendação
+de correção.
 
 ## Princípio arquitetural (NÃO VIOLAR)
 - Detecção baseada em AST (módulo `ast` da stdlib para Python; árvore do
@@ -53,8 +56,8 @@ Todo detector devolve objetos com estes campos:
   categoria oficial da CWE, nao o tema do detector que os encontra.
 
 ## Regras de trabalho
-- Trabalhe em fases pequenas. Ao fim de cada fase, escreva o teste,
-  RODE com pytest e me mostre a saída antes de seguir.
-- Cada fase que passa nos testes termina com um git commit.
-- Explique decisões de design em 1-2 linhas antes de codar.
-- Se algo exigir suposição sobre escopo, PERGUNTE em vez de assumir.
+- Trabalhar em fases pequenas. Ao fim de cada fase, escrever o teste
+  e rodar o pytest antes de seguir.
+- Cada fase que passa nos testes termina com um commit.
+- Registrar decisões de design em 1-2 linhas (docstring ou commit).
+- Dúvida de escopo é discutida com a equipe, não assumida.

@@ -8,11 +8,11 @@ O AEGIS é uma ferramenta de análise estática de segurança (SAST) para códig
 
 | Parte | Localização | Stack | Estado |
 | --- | --- | --- | --- |
-| Motor SAST (núcleo + CLI + API) | `TOOL/owaspscan/` | Python 3.11+, stdlib apenas no núcleo; FastAPI opcional | Maduro, 19 fases, 356 funções de teste |
-| Frontend web | `frontend/` | React 19, Vite 8, Tailwind CSS 3 | Protótipo visual, **não integrado à API** |
+| Motor SAST (núcleo + CLI + API) | `TOOL/owaspscan/` | Python 3.11+, stdlib apenas no núcleo; FastAPI opcional | Maduro, 26 fases, 434 funções de teste (613 testes coletados) |
+| Frontend web | `frontend/` | React 19, Vite 8, Tailwind CSS 3 | Site de demonstração (Vercel); análise simplificada no navegador, **não chama a API** |
 | Gestão acadêmica | `docs/`, `sprints/`, `entregas/`, `.github/` | Markdown | Maioria em estado de template |
 
-Restrições técnicas declaradas do motor (ver `TOOL/README.md` e `TOOL/CLAUDE.md`):
+Restrições técnicas declaradas do motor (ver `TOOL/README.md` e `TOOL/PRINCIPIOS.md`):
 
 - Detecção baseada em AST (módulo `ast` da stdlib), **nunca regex** sobre código-fonte. A única exceção declarada são arquivos de configuração não-Python (`.env`, YAML, JSON, INI, TOML, `.properties`), lidos por parsers de linha/gramática própria em `configuracao.py`.
 - Motor de taint **intraprocedural** (não atravessa chamadas entre funções do projeto) e **insensível a fluxo** (nome contaminado em qualquer ponto do escopo conta como contaminado no escopo inteiro).
@@ -230,14 +230,14 @@ O corte entre seções é `confianca == "baixa"`, não a CWE: qualquer detector 
 | Utiliza | `achado` (MAPA), `configuracao`, `varredura` |
 | Utilizado por | equipe (avaliação contínua) e `tests/conftest.py` (`linhas_esperadas`, `linhas_de_limitacao`, `rodar_detector`) |
 
-Resultado declarado no `TOOL/README.md`: precisão 1.00, recall 0.98, F1 0.99 sobre corpus próprio de 25 arquivos Python + 9 de configuração. Limite de validade declarado: corpus pequeno construído junto com a ferramenta — mede consistência interna, não generalização.
+Resultado declarado no `TOOL/README.md`: precisão 1.00, recall 0.97, F1 0.98 sobre corpus próprio de 38 arquivos de código + 9 de configuração (com o extra `[linguagens]`). Limite de validade declarado: corpus pequeno construído junto com a ferramenta — mede consistência interna, não generalização.
 
 ### Frontend (protótipo)
 
 | | |
 | --- | --- |
 | Localização | `frontend/` |
-| Responsabilidade | SPA React de página única. `main.jsx` monta `<App/>`; `App.jsx` (382 linhas, arquivo único) concentra: navegação por estado (`paginaAtual`), tema dark/light persistido em `localStorage` (chave `aegis-tema`), i18n pt/en (`translate.js`), abas de análise (file/url/snippet/cli), drag & drop de arquivos, páginas estáticas (docs, termos, privacidade, FAQ, scripts) com texto hardcoded |
+| Responsabilidade | SPA React de página única. `main.jsx` monta `<App/>`; `App.jsx` (486 linhas, arquivo único) concentra: navegação por estado (`paginaAtual`), tema dark/light persistido em `localStorage` (chave `aegis-tema`), i18n pt/en (`translate.js`), abas de análise (file/url/snippet/cli), drag & drop de arquivos, páginas estáticas (docs, termos, privacidade, FAQ, scripts) com texto hardcoded |
 | Dependências | react/react-dom 19; build: Vite 8, Tailwind 3.4, PostCSS, Oxlint |
 | Integração | **Nenhuma.** Arquivos enviados ficam apenas no `useState`; nenhum `fetch` no código. Os textos exibidos descrevem funcionalidades que não existem (análise de malware/URLs/domínios, múltiplas linguagens, `npm install -g @aegis/cli`, API `https://api.aegis.dev/v1`) |
 
@@ -247,7 +247,7 @@ O contrato de integração futuro já está definido no `TOOL/README.md` (seçã
 
 | | |
 | --- | --- |
-| Localização | `TOOL/tests/` (19 arquivos, 356 funções `test_*` — coleta pytest maior, há parametrizados) |
+| Localização | `TOOL/tests/` (24 arquivos, 434 funções `test_*`, 613 testes coletados — há parametrizados) |
 | Responsabilidade | Cobrem todas as camadas: contrato, analisador, taint (38 testes), sanitização, cada detector, relatório, configuração, API (26 testes), integração ponta-a-ponta e métricas. `conftest.py` expõe atalhos de gabarito. `tests/amostras/` é o corpus rotulado (vulneravel/, seguro/, analisador/, config/) — as amostras de `seguro/` são seguras **para a CWE que nomeiam**, não para todas |
 | Execução | `.venv/bin/python -m pytest -v` em `TOOL/` |
 | Lacuna | Frontend sem nenhum teste |
@@ -334,7 +334,7 @@ Privacidade: o frontend afirma em texto estático que nada é armazenado — coe
 
 ## Decisões técnicas
 
-Registradas em `TOOL/CLAUDE.md`, docstrings e READMEs (ainda sem ADRs formais em `docs/decisoes/`):
+Registradas em `TOOL/PRINCIPIOS.md`, docstrings e READMEs (ainda sem ADRs formais em `docs/decisoes/`):
 
 1. **Stdlib-only no núcleo** — sem dependências pesadas; FastAPI isolado como extra `[api]` para o scanner nunca depender de framework web.
 2. **AST, nunca regex** — com exceção declarada e delimitada para arquivos de configuração não-Python.
@@ -378,9 +378,9 @@ Registradas em `TOOL/CLAUDE.md`, docstrings e READMEs (ainda sem ADRs formais em
 2. **Frontend descreve produto diferente**: textos de `translate.js`/`App.jsx` prometem análise de malware/URLs/domínios/IPs, suporte a JavaScript/PHP/C++, CLI npm `@aegis/cli` e API `api.aegis.dev` — nada disso existe; o motor analisa somente Python/configuração.
 3. **Identidade dupla**: README raiz ("AEGIS-CODE", com pre-commit hook e bloqueio de merge em CI) vs `TOOL/README.md` ("OWASP-Scan", iniciação científica). Hook de pre-commit e integração de CI citados no README raiz não estão implementados.
 4. **API sem autenticação nem rate limit** — aceitável em localhost, não em deployment público.
-5. **Sem CI/CD** — as 356 funções de teste (mais com parametrização) só rodam localmente.
+5. **Sem CI/CD** — os 613 testes coletados só rodam localmente.
 6. **Documentação de gestão vazia** — `docs/requisitos.md` segue template, CHANGELOG para na Sprint 00 apesar de 19 fases, `TOOL/README.md` lista "Estado" até a Fase 16 (git mostra Fase 19), LICENSE é placeholder institucional.
-7. **Sem testes de frontend** e UI inteira em um único arquivo de 382 linhas.
+7. **Sem testes de frontend** e UI inteira em um único arquivo de 486 linhas.
 8. **Limitações do motor** (intraprocedural, insensível a fluxo, cego a templates) são conhecidas, declaradas e medidas como FN pela avaliação — não são defeitos ocultos, mas restringem o uso como única barreira de segurança.
 
 ## Diagramas e relação com ADRs

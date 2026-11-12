@@ -1,6 +1,6 @@
 """Fase 0: o contrato interno de achado e o mapa CWE -> OWASP.
 
-Os valores esperados sao escritos literalmente aqui, copiados do CLAUDE.md,
+Os valores esperados sao escritos literalmente aqui, copiados do PRINCIPIOS.md,
 para que o teste seja um oraculo independente do codigo de producao.
 """
 
@@ -16,7 +16,7 @@ from owaspscan.achado import (
     criar_achado,
 )
 
-# Copiado do CLAUDE.md, secao "Formato do achado".
+# Copiado do PRINCIPIOS.md, secao "Formato do achado".
 CAMPOS_ESPERADOS = (
     "arquivo",
     "linha",
@@ -30,7 +30,7 @@ CAMPOS_ESPERADOS = (
     "recomendacao",
 )
 
-# Copiado do CLAUDE.md, secao "Mapeamento CWE -> OWASP".
+# Copiado do PRINCIPIOS.md, secao "Mapeamento CWE -> OWASP".
 MAPEAMENTO_ESPERADO = {
     "CWE-89": ("A03:2021 Injection", "SQL Injection"),
     "CWE-79": ("A03:2021 Injection", "Cross-Site Scripting"),

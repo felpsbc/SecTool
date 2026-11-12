@@ -1,5 +1,7 @@
 # Auditoria da documentação
 
+> **Registro histórico.** Este documento descreve a auditoria feita em um momento anterior do projeto; caminhos e números citados aqui podem ter mudado desde então. A documentação atual está em [`docs/`](../) e no [`README.md`](../../README.md).
+
 Auditoria completa da documentação do projeto comparada com o código-fonte real. Este documento registra os achados; as correções aplicadas na etapa seguinte estão na seção **Nota pós-correção**, ao final.
 
 ## Método e limitações

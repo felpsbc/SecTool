@@ -7,7 +7,7 @@ O projeto tem **duas partes independentes** — instale só o que for usar:
 | Parte | O que é | Stack |
 | --- | --- | --- |
 | **A. TOOL** | Motor SAST + CLI (núcleo) e API HTTP (opcional) | Python ≥3.11, stdlib no núcleo |
-| **C. Frontend** | Interface web (protótipo; ainda não consome a API) | Node.js + npm |
+| **C. Frontend** | Site de demonstração (análise simplificada no navegador; não consome a API) | Node.js + npm |
 
 Não há banco de dados, serviço externo, Docker ou CI — nada além do que está documentado aqui precisa ser instalado.
 
@@ -176,7 +176,7 @@ cd TOOL
 
 Execute em ordem; cada passo tem resultado esperado determinado pelos arquivos do projeto.
 
-**1. Testes do TOOL** (356 funções de teste; coleta pytest maior — parametrizados):
+**1. Testes do TOOL** (434 funções de teste; 613 testes coletados — há parametrizados):
 
 ```bash
 cd TOOL && .venv/bin/python -m pytest -v
@@ -199,7 +199,7 @@ Esperado: a primeira imprime relatório com achados de severidade alta (SQL Inje
 .venv/bin/python -m owaspscan.metricas tests/amostras
 ```
 
-Esperado: tabela por CWE com precisão 1.00, recall 0.98, F1 0.99 no geral.
+Esperado (com o extra `[linguagens]`): tabela por CWE com precisão 1.00, recall 0.97, F1 0.98 no geral.
 
 **4. API no ar** (se instalou o extra `[api]`):
 

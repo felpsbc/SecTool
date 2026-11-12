@@ -10,7 +10,7 @@ O repositório tem 3 partes:
 
 | Parte | Onde | Estado |
 | --- | --- | --- |
-| Motor SAST (núcleo + CLI + API) | `TOOL/` | maduro, 356 funções de teste, fases 0–19 (commits individuais da Fase 10 em diante) |
+| Motor SAST (núcleo + CLI + API) | `TOOL/` | maduro, 434 funções de teste (613 coletados), fases 0–26 (commits individuais da Fase 10 em diante) |
 | Frontend web | `frontend/` | protótipo visual — **ainda não chama a API** |
 | Documentação/gestão da disciplina | `docs/`, `sprints/`, `entregas/`, `.github/` | parcialmente preenchida |
 
@@ -43,7 +43,7 @@ Windows: troque `.venv/bin/python` por `.venv\Scripts\python`.
 
 ## 4. Onde fica o frontend?
 
-`frontend/` — SPA React 19 + Vite 8 + Tailwind 3. Praticamente tudo está em **`frontend/src/App.jsx`** (382 linhas: navegação, tema dark/light, i18n pt/en, abas de análise, páginas estáticas). Traduções em `frontend/src/translate.js`; bootstrap em `frontend/src/main.jsx`. Não há roteador, gerenciador de estado nem componentes separados.
+`frontend/` — SPA React 19 + Vite 8 + Tailwind 3. Praticamente tudo está em **`frontend/src/App.jsx`** (486 linhas: navegação, tema dark/light, i18n pt/en, abas de análise, páginas estáticas). Traduções em `frontend/src/translate.js`; bootstrap em `frontend/src/main.jsx`. Não há roteador, gerenciador de estado nem componentes separados.
 
 ⚠️ Saiba antes de mexer: o frontend é só casca — os botões "Analisar"/"Confirmar upload" não enviam nada (não existe `fetch` em `frontend/src/`), e vários textos exibidos descrevem funcionalidades que não existem (análise de malware/URL, PHP/C++, `@aegis/cli`, `api.aegis.dev`). A integração real seria chamar `POST /analisar` da API (contrato pronto em `TOOL/README.md` §"API HTTP (para o site)").
 
@@ -95,7 +95,7 @@ Ficha completa com impacto de cada uma: `docs/configuracao.md`. Não há `.env` 
 
 ## 10. Onde ficam os testes?
 
-`TOOL/tests/` — 19 arquivos pytest (356 funções de teste; coleta maior por parametrizados), um por camada/detector (`test_taint.py` é o maior, 38). `conftest.py` tem os atalhos (`rodar_detector`, `linhas_esperadas`). O corpus **`TOOL/tests/amostras/`** tem dupla função: fixtures e corpus de avaliação — o gabarito mora em comentários nas próprias amostras (`# achado: CWE-89` na linha do sink; `# limitacao: CWE-89 ...` para falha conhecida). **O frontend não tem nenhum teste.**
+`TOOL/tests/` — 24 arquivos pytest (434 funções de teste; 613 testes coletados por causa dos parametrizados), um por camada/detector (`test_taint.py` é o maior, 38). `conftest.py` tem os atalhos (`rodar_detector`, `linhas_esperadas`). O corpus **`TOOL/tests/amostras/`** tem dupla função: fixtures e corpus de avaliação — o gabarito mora em comentários nas próprias amostras (`# achado: CWE-89` na linha do sink; `# limitacao: CWE-89 ...` para falha conhecida). **O frontend não tem nenhum teste.**
 
 ## 11. Onde começar a investigar um bug?
 
@@ -127,7 +127,7 @@ Ferramentas: reproduzir com `python -m owaspscan <amostra>`, isolar com os helpe
 6. Testes: `tests/test_<nome>.py` + amostras rotuladas em `tests/amostras/` (vulnerável E segura). Rode `pytest` e `python -m owaspscan.metricas tests/amostras` — precisão não pode cair.
 7. Atualize a tabela de cobertura do `TOOL/README.md`.
 
-**Processo da casa** (`TOOL/CLAUDE.md`, obrigatório): fases pequenas; ao fim de cada fase escrever o teste, rodar pytest e mostrar a saída; cada fase que passa termina com um git commit; explicar decisões de design em 1-2 linhas antes de codar; se houver dúvida de escopo, perguntar em vez de assumir.
+**Processo da casa** (`TOOL/PRINCIPIOS.md`, obrigatório): fases pequenas; ao fim de cada fase escrever o teste e rodar o pytest; cada fase que passa termina com um git commit; explicar decisões de design em 1-2 linhas antes de codar; se houver dúvida de escopo, perguntar em vez de assumir.
 
 **Outras funcionalidades:** nova consulta estrutural → `motor/estrutura.py`; novo formato de configuração → `configuracao.py` + `formato_de()` (+ validação de extensão em `api.py:85-90` e testes); nova página/seção web → `App.jsx` (+ textos em `translate.js` nos DOIS idiomas); integração frontend↔API → `App.jsx` chamando `POST /analisar` (exemplos prontos em `TOOL/README.md` §API HTTP) + decidir URL da API (proxy no `vite.config.js` ou env `VITE_*`).
 
@@ -147,7 +147,7 @@ Tudo em `frontend/src/App.jsx`: navegação por estado (`paginaAtual`, sem route
 
 ```bash
 cd TOOL
-.venv/bin/python -m pytest -v              # tudo (356 funções de teste)
+.venv/bin/python -m pytest -v              # tudo (613 testes coletados)
 .venv/bin/python -m pytest tests/test_sqli.py -v          # um arquivo
 .venv/bin/python -m pytest -k "idor" -v                   # por nome
 .venv/bin/python -m owaspscan.metricas tests/amostras     # métricas do motor (P/R/F1)
@@ -171,7 +171,7 @@ Se precisar depurar a análise em si, o caminho não é log: é reproduzir com a
 
 Ordem de leitura recomendada para as primeiras semanas:
 
-1. `TOOL/CLAUDE.md` — princípios inegociáveis (AST nunca regex, contrato fixo, IDOR heurístico, honestidade > cobertura)
+1. `TOOL/PRINCIPIOS.md` — princípios inegociáveis (AST nunca regex, contrato fixo, IDOR heurístico, honestidade > cobertura)
 2. `TOOL/README.md` — cobertura, limitações declaradas, calibração de confiança, uso
 3. `TOOL/owaspscan/achado.py` — o contrato que atravessa tudo
 4. `TOOL/owaspscan/varredura.py` — o pipeline inteiro em 130 linhas (`executar()`)
@@ -189,7 +189,7 @@ Mexeu aqui, redobre o cuidado (e os testes):
 | Área | Por quê |
 | --- | --- |
 | `achado.py` — `MAPA_CWE_OWASP` | Contrato fechado: classificação errada contamina TODOS os achados. Só estender com categoria oficial OWASP 2021 + atualização de `test_contrato.py` |
-| `motor/taint.py` — loop de ponto fixo | Sutil: qualquer mudança afeta todos os detectores de taint; pode introduzir falsos negativos silenciosos (o pior erro para uma ferramenta de segurança — princípio do `CLAUDE.md`) |
+| `motor/taint.py` — loop de ponto fixo | Sutil: qualquer mudança afeta todos os detectores de taint; pode introduzir falsos negativos silenciosos (o pior erro para uma ferramenta de segurança — princípio do `PRINCIPIOS.md`) |
 | `motor/catalogo.py` — sanitizadores | Cada sanitizador declara quais CWEs neutraliza. Tratar sanitização como absoluta = falso negativo (ex.: `html.escape` NÃO defende SQLi) |
 | `api.py` — `nome_seguro`/`montar_envios` | Fronteira contra entrada hostil (path traversal, abuso de tamanho). Enfraquecer aqui abre vulnerabilidade real no produto |
 | `motor/credenciais.py` — `mascarar` | Se regressar, a ferramenta passa a vazar os segredos que detecta |
@@ -202,7 +202,7 @@ Mexeu aqui, redobre o cuidado (e os testes):
 
 ## Primeiros passos sugeridos (checklist do dia 1)
 
-1. Ler `TOOL/CLAUDE.md` e `TOOL/README.md` (30 min).
+1. Ler `TOOL/PRINCIPIOS.md` e `TOOL/README.md` (30 min).
 2. Setup do item 3 e rodar `pytest -v` — tudo verde.
 3. Rodar `python -m owaspscan tests/amostras/vulneravel` e ler o relatório comparando com as amostras.
 4. Rodar `python -m owaspscan.metricas tests/amostras` e entender o gabarito embutido.

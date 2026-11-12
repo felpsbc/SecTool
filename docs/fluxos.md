@@ -216,7 +216,7 @@ Varredura (imutável) → relatorio (texto/JSON)
 4. **Funções**: `carregar_gabarito()` (`metricas.py:57`) extrai o esperado dos comentários; `varredura.executar()` roda o motor no corpus; `avaliar()` (`metricas.py:107`) confronta achados × gabarito.
 5. **Dados**: **consulta** `tests/amostras/` (26 `.py` — 25 analisados + 1 com erro de sintaxe proposital — e 9 arquivos de configuração); nada é modificado. Regra de honestidade: `# limitacao` (falha conhecida, ex.: fluxo interprocedural) **conta como falso negativo** — "declarar a falha não a transforma em acerto" (`metricas.py:9-13`).
 6. **Componentes**: `metricas.py` → `configuracao.descobrir_configuracoes` + `varredura.executar` (motor completo) → `achado.MAPA_CWE_OWASP` (para o universo de CWEs).
-7. **Resultado**: tabela por CWE com VP/FP/FN, precisão, recall e F1 no stdout (`formatar_tabela`, `metricas.py:148`). Valores de referência declarados: precisão 1.00, recall 0.98, F1 0.99 (corpus próprio — mede consistência interna, não generalização).
+7. **Resultado**: tabela por CWE com VP/FP/FN, precisão, recall e F1 no stdout (`formatar_tabela`, `metricas.py:148`). Valores de referência declarados: precisão 1.00, recall 0.97, F1 0.98 (com o extra `[linguagens]`) (corpus próprio — mede consistência interna, não generalização).
 8. **Erros**: amostra ilegível segue a resiliência do núcleo (`FalhaDeLeitura`); amostra sem gabarito simplesmente não contribui com itens esperados.
 
 Este fluxo também alimenta os **testes automatizados**: `tests/conftest.py` usa `carregar_gabarito` (`linhas_esperadas`, `linhas_de_limitacao`) para que cada `test_*.py` confira detectores contra as mesmas amostras rotuladas.
@@ -236,22 +236,17 @@ Este fluxo também alimenta os **testes automatizados**: `tests/conftest.py` usa
 
 ---
 
-## Fluxo 5 — Navegação no frontend (estado atual: protótipo)
+## Fluxo 5 — Site de demonstração (análise simplificada no navegador)
 
-**Exemplo**: usuário abre o site local (`npm run dev`), alterna tema e idioma, arrasta arquivos.
+**Exemplo**: usuário abre <https://aegisscan-zeta.vercel.app/> (ou `npm run dev`), cola um trecho na aba de código e clica em **Analisar**.
 
 1. **Começo**: navegador carrega `frontend/index.html` → `src/main.jsx` monta `<App/>` (React StrictMode) no `#root`.
-2. **Recebe**: `frontend/src/App.jsx` — componente único que concentra todo o estado e renderização.
-3. **Validações**: nenhuma relevante; drag & drop aceita qualquer arquivo no estado local (`handleDrop`, `App.jsx:78-84`), sem checagem de tipo/tamanho (a API faria essa validação — se fosse chamada).
-4. **Funções/estado**: `useState` para `idioma`, `tema` (inicializado de `localStorage['aegis-tema']`, `App.jsx:33`), `abaAtiva`, `paginaAtual`, `arquivos`, `arrastando`; `useEffect` aplica a classe `dark` no `<html>` e persiste o tema (`App.jsx:47-62`); `navegarPara()` troca a "página" sem roteador (`App.jsx:98-102`); `renderizarConteudo()` decide home vs. páginas estáticas (`App.jsx:105-315`).
-5. **Dados**: `traducoes` de `src/translate.js` (i18n pt/en); textos das páginas estáticas hardcoded em `conteudosPagina` (`App.jsx:269-294`); **única escrita persistente**: `localStorage['aegis-tema']`. Nenhum dado sai do navegador — **não há `fetch`/XHR em todo o `frontend/src/`**.
-6. **Componentes**: `main.jsx`, `App.jsx` (ícones SVG internos, `AIcon`), `translate.js`, `index.css` (Tailwind).
-7. **Resultado**: UI reage (tema, idioma, abas file/url/snippet/cli, remoção de chips de arquivo, páginas docs/termos/privacidade/FAQ/scripts). Os botões "Confirmar upload", "Pesquisar" e "Analisar" **não produzem análise** — não têm handler de envio.
-8. **Erros**: não há caminho de erro de rede (nenhuma chamada); erros possíveis só de runtime React. ⚠️ Inconsistências documentadas: os textos prometem funcionalidades inexistentes (malware/URL/domínio, múltiplas linguagens, `@aegis/cli`, `api.aegis.dev`) — registradas em `docs/arquitetura.md` §Riscos.
-
-**Fluxo futuro previsto** (contrato já publicado em `TOOL/README.md` §"API HTTP (para o site)", ainda não implementado): `App.jsx` coletaria `arquivos`/textarea → `fetch POST /analisar` (FormData ou JSON) → renderizaria `resultado.resumo`/`resultado.achados`. É a integração natural entre os fluxos 5 e 2.
-
----
+2. **Recebe**: `frontend/src/App.jsx` — componente único que concentra estado, navegação e análise.
+3. **Entrada**: três abas — código colado (`codigoSnippet`), arquivos (arrastar/soltar: `handleDrop`, `handleFileChange`) e URL (`urlInput`).
+4. **Análise**: `executarAnalise()` simula o processamento com um `setTimeout` e chama `analisarTexto()`, que aplica as expressões regulares do array `REGRAS_SAST` (CWE-94, CWE-79, CWE-798, CWE-319, CWE-327, CWE-89). **Não usa o motor `owaspscan`** nem a API: é uma demonstração simplificada.
+5. **Dados**: `traducoes` de `src/translate.js` (i18n pt/en); única escrita persistente: `localStorage['aegis-tema']`. Nenhum dado sai do navegador.
+6. **Resultado**: painel com os achados das regras locais (estado `relatorio`); páginas estáticas (documentação, FAQ, termos, privacidade) por navegação de estado (`navegarPara`), sem mudança de URL.
+7. **Diferença em relação ao motor**: o resultado do site pode divergir do `aegis.py`/Colab, que usam AST e taint tracking. O cliente da API (`src/api.js`) e o painel do motor (`src/Resultado.jsx`) estão prontos, mas não ligados — ver `docs/deploy.md`, Apêndice D.
 
 ## Resumo do tratamento de erros (todos os fluxos)
 

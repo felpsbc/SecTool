@@ -2,6 +2,15 @@
 
 Registre aqui as mudanças relevantes por sprint ou marco avaliativo.
 
+## Uso simplificado e organização do repositório
+
+- `aegis.py` na raiz: modo guiado (dois cliques / arrastar a pasta) e comandos (`--testar`, `--saida`, `--api`), preparando o ambiente sozinho.
+- `AEGIS.ipynb`: notebook Google Colab que abre direto numa caixa para colar código; projeto inteiro (GitHub, zip, Drive) e métricas como etapas opcionais.
+- README reescrito: início rápido, guias Windows e Linux, leitura do relatório, problemas comuns e mapa de "onde está cada coisa".
+- `docs/teste/`: exemplos renomeados por conteúdo, guia (`README.md`) e roteiro de demonstração (`ROTEIRO_DE_DEMONSTRACAO.md`).
+- Limpeza: removidos arquivos sem uso (`package-lock.json` vazio na raiz, imagens do template do Vite, `App.css` vazio); `TOOL/CLAUDE.md` → `TOOL/PRINCIPIOS.md`; `docs/API.md` → `docs/api.md`; auditoria da documentação movida para `docs/historico/`.
+- Documentação atualizada com números conferidos: 613 testes passando; precisão 1.00, recall 0.97, F1 0.98.
+
 ## Licença e uso
 
 - Projeto passa a ser distribuído sob a licença MIT (`LICENSE`), substituindo o placeholder institucional.
@@ -15,7 +24,7 @@ Registre aqui as mudanças relevantes por sprint ou marco avaliativo.
 
 ## Frontend
 
-- Protótipo base da interface web (React 19 / Vite 8 / Tailwind): tema claro/escuro, i18n pt/en, abas de análise. Ainda sem integração com a API.
+- Protótipo base da interface web (React 19 / Vite 8 / Tailwind): tema claro/escuro, i18n pt/en, abas de análise.
 
 ## Documentação
 
@@ -28,6 +37,8 @@ Registre aqui as mudanças relevantes por sprint ou marco avaliativo.
 - Definição do problema, da equipe, dos papéis e do backlog inicial.
 
 ## Integração site + API
+
+> Situação atual: o site publicado voltou a fazer a análise no navegador e não chama a API; `src/api.js` e `src/Resultado.jsx` seguem prontos para religar (ver `docs/deploy.md`, Apêndice D).
 
 - Site (`frontend/`) ligado à API do OWASP-Scan: abas Ficheiro, Código e URL
   chamam `POST /analisar` e exibem o resultado na página (achados rastreados
